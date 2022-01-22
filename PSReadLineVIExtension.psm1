@@ -118,7 +118,7 @@ function VIDeleteOuterBlock(){
 	$quotes["("] = @('(',')')
 	$quotes["{"] = @('{','}')
 	$quotes["["] = @('[',']')
-	$quotes["w"] = @("$[({})]-._ '```"", "$[({})]-._ '```"")
+	$quotes["w"] = @("$[({})]-._ '```"\/", "$[({})]-._ '```"\/")
 	$quotes["W"] = @(' ', ' ')
 	$quote = ([Console]::ReadKey($true)).KeyChar
 	if( $quotes.ContainsKey($quote.toString())){
