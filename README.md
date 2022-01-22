@@ -12,8 +12,9 @@ id est : ci di
 " ' ( [ { : Manipulate text between selected bracket
 ### Supported mouvement key
 w W : Manipulate text between non word character ou blank character
+C 	: Manipulate text between non word and Caps 
 ## Outer Text
-Appaends binding to manipulate outer text
+Appends binding to manipulate outer text
 id est : ca da
 ### Supported bracket key
 " ' ( [ { : Manipulate text between selected bracket
@@ -26,11 +27,11 @@ id est : cs ds
 " ' ( [ { 
 example : cs"' will replace cursor surrounding " by '
 ## Increments / Decrements
-Ctrl+a will increment under cursor interger
+ctrl+a will increment under cursor interger
 
 ctrl+x will increment under cursor interger
 
-Note : Supports digit arguments 10ctrl+a will increment by 
+Note : Supports digit arguments 10ctrl+a will increment by 10
 ## Global Clipboard
 +y will yank current buffer in system clibboard
 
