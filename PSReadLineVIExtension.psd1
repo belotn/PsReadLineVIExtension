@@ -9,7 +9,7 @@
 @{
 
 # Script module or binary module file associated with this manifest.
-# RootModule = ''
+RootModule = 'PSReadLineVIExtension.psm1'
 
 # Version number of this module.
 ModuleVersion = '0.0.1'
@@ -30,7 +30,7 @@ CompanyName = 'Unknown'
 Copyright = '(c) Karrakis. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'Some VimBinding'
+Description = 'Extend PSREadline VI Binding with some text object manipulation'
 
 # Minimum version of the PowerShell engine required by this module
 # PowerShellVersion = ''
@@ -66,7 +66,7 @@ Description = 'Some VimBinding'
 # FormatsToProcess = @()
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-	NestedModules = @('PSReadLineViExtension')
+# NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 	FunctionsToExport = 'VIDecrement', 'VIIncrement', 'VIChangeInnerBlock', 'VIDeleteInnerBlock', 'VIChangeOuterBlock', 'VIDeleteOuterBlock', 'ViChangeSurround', 'ViDeleteSurround', 'VIGlobalYank', 'VIGlobalPaste'
@@ -95,13 +95,13 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+          Tags = @('PSReadLine','VIMode')
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/belotn/PsReadLineVIExtension/blob/e880210b3f41cbacfdb0e42f9670bcaa10386119/LICENS'
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/belotn/PsReadLineVIExtension'
 
         # A URL to an icon representing this module.
         # IconUri = ''
@@ -110,7 +110,7 @@ PrivateData = @{
         ReleaseNotes = 'First Release'
 
         # Prerelease string of this module
-        # Prerelease = ''
+        Prerelease = '-beta'
 
         # Flag to indicate whether the module requires explicit user acceptance for install/update/save
         # RequireLicenseAcceptance = $false
