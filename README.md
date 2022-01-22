@@ -27,9 +27,13 @@ id est : cs ds
 example : cs"' will replace cursor surrounding " by '
 ## Increments / Decrements
 Ctrl+a will increment under cursor interger
+
 ctrl+x will increment under cursor interger
+
 Note : Supports digit arguments 10ctrl+a will increment by 
 ## Global Clipboard
 +y will yank current buffer in system clibboard
+
 +p will paste after cursor current system clipboard
+
 +P will paste before cursor current system clipboard
