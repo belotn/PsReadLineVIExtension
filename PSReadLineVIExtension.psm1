@@ -171,10 +171,14 @@ function VIDeleteOuterBlock(){
 		}elseif( $quote.toString() -eq 'W'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
 		}elseif($quote.toString() -eq '"' -or $quote.toString() -eq "'" ){ 
+			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
+					$StartChar )
 			$LocalShell.SendKeys($quote)
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
 		}elseif( $quote.toString() -eq '(' -or $quote.toString() -eq '[' -or `
 				$quote.toString() -eq '{' ){
+			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
+					$StartChar )
 			$LocalShell.SendKeys("{$($ClosingQuotes.toString())}")
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
 		} elseif( $quote.toString() -eq 'C') {
