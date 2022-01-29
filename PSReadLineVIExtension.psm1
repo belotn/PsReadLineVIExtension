@@ -114,10 +114,14 @@ function VIDeleteInnerBlock(){
 				$quote.toString() -eq '{' ){
 			$LocalShell.SendKeys("{$($ClosingQuotes.toString())}")
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
-		} else {
+		} elseif( $quote.toString() -eq 'C') {
+			$LocalShell.SendKeys($Line[$EndChar])
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
+
+		 } #else {
 			# [Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar,`
 			# 		$EndChar - $StartChar, '')
-		}
+		# }
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($StartChar)
 	}
 }
@@ -160,8 +164,26 @@ function VIDeleteOuterBlock(){
 		if(($OpeningQuotes.Length -gt 1 -or $quote -eq 'W') -and $StartChar -lt 0){
 			$StartChar = 0 
 		}
-		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar, `
-				$EndChar - $StartChar, '')
+		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
+					$StartChar )
+		if($quote.toString() -eq 'w'){
+			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()		
+		}elseif( $quote.toString() -eq 'W'){
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
+		}elseif($quote.toString() -eq '"' -or $quote.toString() -eq "'" ){ 
+			$LocalShell.SendKeys($quote)
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
+		}elseif( $quote.toString() -eq '(' -or $quote.toString() -eq '[' -or `
+				$quote.toString() -eq '{' ){
+			$LocalShell.SendKeys("{$($ClosingQuotes.toString())}")
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
+		} elseif( $quote.toString() -eq 'C') {
+			$LocalShell.SendKeys($Line[$EndChar])
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
+
+		} #else {
+		# [Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar, `
+		# 		$EndChar - $StartChar, '')
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($StartChar)
 	}
 }
@@ -251,5 +273,5 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', 'VIChangeInnerBlock'
 #       Should be ciC and diC                                                  #
 # DONE: Use compatible Ps5 char range operator                                 #
 # DONE: Add function to access global clipboard                                #
-# TODO: Delete must add erase test in register                                 #
+# Done: Delete must add erase text in register  (VIDelete*)                    #
 ################################################################################
