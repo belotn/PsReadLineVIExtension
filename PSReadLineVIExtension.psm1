@@ -14,6 +14,7 @@ Set-PSReadLineKeyHandler -Chord "+,p" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste }
 Set-PSReadLineKeyHandler -Chord "+,P" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste $true }
+$LocalShell = New-Object -ComObject wscript.shell
 ######################################################################
 # Section Function                                                   #
 ######################################################################
@@ -25,10 +26,10 @@ function VIDecrement( $key , $arg ){
 	$Cursor = $Null
 	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
 		[ref]$Cursor)
-	$OpeningQuote=' '
-	$ClosingQuote=' '
-	$EndChar=$Line.indexOf($ClosingQuote, $Cursor)
-	$StartChar=$Line.LastIndexOf($OpeningQuote, $Cursor) + 1
+	$OpeningQuote = ' '
+	$ClosingQuote = ' '
+	$EndChar = $Line.indexOf($ClosingQuote, $Cursor)
+	$StartChar = $Line.LastIndexOf($OpeningQuote, $Cursor) + 1
 	[int]$nextVal = $Line.Substring($StartChar, $EndChar - $StartChar)
 	$nextVal -= $numericArg
 
@@ -100,8 +101,27 @@ function VIDeleteInnerBlock(){
 		if( $quote.toString() -eq 'C'){
 			$StartChar -= 1
 		}
-		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar,`
-					$EndChar - $StartChar, '')
+		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
+					$StartChar )
+		if($quote.toString() -eq 'w'){
+			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()		
+		}elseif( $quote.toString() -eq 'W'){
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
+		}elseif($quote.toString() -eq '"' -or $quote.toString() -eq "'" ){ 
+			$LocalShell.SendKeys($quote)
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
+		}elseif( $quote.toString() -eq '(' -or $quote.toString() -eq '[' -or `
+				$quote.toString() -eq '{' ){
+			$LocalShell.SendKeys("{$($ClosingQuotes.toString())}")
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
+		} elseif( $quote.toString() -eq 'C') {
+			$LocalShell.SendKeys($Line[$EndChar])
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
+
+		 } #else {
+			# [Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar,`
+			# 		$EndChar - $StartChar, '')
+		# }
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($StartChar)
 	}
 }
@@ -144,8 +164,26 @@ function VIDeleteOuterBlock(){
 		if(($OpeningQuotes.Length -gt 1 -or $quote -eq 'W') -and $StartChar -lt 0){
 			$StartChar = 0 
 		}
-		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar, `
-				$EndChar - $StartChar, '')
+		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
+					$StartChar + 1)
+		if($quote.toString() -eq 'w'){
+			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()		
+		}elseif( $quote.toString() -eq 'W'){
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
+		}elseif($quote.toString() -eq '"' -or $quote.toString() -eq "'" ){ 
+			$LocalShell.SendKeys($quote)
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
+		}elseif( $quote.toString() -eq '(' -or $quote.toString() -eq '[' -or `
+				$quote.toString() -eq '{' ){
+			$LocalShell.SendKeys("{$($ClosingQuotes.toString())}")
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
+		} elseif( $quote.toString() -eq 'C') {
+			$LocalShell.SendKeys($Line[$EndChar])
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
+
+		} #else {
+		# [Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar, `
+		# 		$EndChar - $StartChar, '')
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($StartChar)
 	}
 }
@@ -235,5 +273,5 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', 'VIChangeInnerBlock'
 #       Should be ciC and diC                                                  #
 # DONE: Use compatible Ps5 char range operator                                 #
 # DONE: Add function to access global clipboard                                #
-# TODO: Delete must add erase test in register                                 #
+# Done: Delete must add erase text in register  (VIDelete*)                    #
 ################################################################################
