@@ -165,7 +165,7 @@ function VIDeleteOuterBlock(){
 			$StartChar = 0 
 		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
-					$StartChar )
+					$StartChar + 1)
 		if($quote.toString() -eq 'w'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()		
 		}elseif( $quote.toString() -eq 'W'){
