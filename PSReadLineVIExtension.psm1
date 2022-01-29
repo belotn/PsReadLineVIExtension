@@ -14,6 +14,7 @@ Set-PSReadLineKeyHandler -Chord "+,p" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste }
 Set-PSReadLineKeyHandler -Chord "+,P" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste $true }
+$LocalShell = New-Object -ComObject wscript.shell
 ######################################################################
 # Section Function                                                   #
 ######################################################################
@@ -25,10 +26,10 @@ function VIDecrement( $key , $arg ){
 	$Cursor = $Null
 	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
 		[ref]$Cursor)
-	$OpeningQuote=' '
-	$ClosingQuote=' '
-	$EndChar=$Line.indexOf($ClosingQuote, $Cursor)
-	$StartChar=$Line.LastIndexOf($OpeningQuote, $Cursor) + 1
+	$OpeningQuote = ' '
+	$ClosingQuote = ' '
+	$EndChar = $Line.indexOf($ClosingQuote, $Cursor)
+	$StartChar = $Line.LastIndexOf($OpeningQuote, $Cursor) + 1
 	[int]$nextVal = $Line.Substring($StartChar, $EndChar - $StartChar)
 	$nextVal -= $numericArg
 
@@ -100,8 +101,23 @@ function VIDeleteInnerBlock(){
 		if( $quote.toString() -eq 'C'){
 			$StartChar -= 1
 		}
-		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar,`
-					$EndChar - $StartChar, '')
+		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
+					$StartChar )
+		if($quote.toString() -eq 'w'){
+			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()		
+		}elseif( $quote.toString() -eq 'W'){
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
+		}elseif($quote.toString() -eq '"' -or $quote.toString() -eq "'" ){ 
+			$LocalShell.SendKeys($quote)
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
+		}elseif( $quote.toString() -eq '(' -or $quote.toString() -eq '[' -or `
+				$quote.toString() -eq '{' ){
+			$LocalShell.SendKeys("{$($ClosingQuotes.toString())}")
+			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
+		} else {
+			# [Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar,`
+			# 		$EndChar - $StartChar, '')
+		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($StartChar)
 	}
 }
