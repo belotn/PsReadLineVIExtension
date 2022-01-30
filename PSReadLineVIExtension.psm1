@@ -24,6 +24,8 @@ $LocalShell = New-Object -ComObject wscript.shell
 ######################################################################
 # Section Function                                                   #
 ######################################################################
+# {{{ Increment/decrement
+
 function VIDecrement( $key , $arg ){
 	[int]$numericArg = 0
 	[Microsoft.PowerShell.PSConsoleReadLine]::TryGetArgAsInt($arg,
@@ -63,7 +65,9 @@ function VIIncrement( $key , $arg ){
 				$EndChar - $StartChar, $nextVal.toString() )
 	[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($EndChar - 1)
 }
+# }}}
 
+# {{{ InnerBlock
 function VIChangeInnerBlock(){
 	VIDeleteInnerBlock
 	[Microsoft.PowerShell.PSConsoleReadLine]::ViInsertMode()
@@ -132,6 +136,10 @@ function VIDeleteInnerBlock(){
 	}
 }
 
+# }}}
+
+# {{{ OuterBlock
+
 function VIChangeOuterBlock(){
 	VIDeleteOuterBlock
 	[Microsoft.PowerShell.PSConsoleReadLine]::ViInsertMode()
@@ -197,7 +205,9 @@ function VIDeleteOuterBlock(){
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($StartChar)
 	}
 }
+# }}}
 
+# {{{ Surround
 function ViChangeSurround(){
 	# inspired by tpope vim-surround
 	# https://github.com/tpope/vim-surround
@@ -250,7 +260,9 @@ function ViDeleteSurround(){
 	[Microsoft.PowerShell.PSConsoleReadLine]::Replace($EndChar - 1, `
 		1,'' )
 }
+# }}}
 
+# {{{ Global Clipboard 
 function VIGlobalYank (){
 	$line = $null
 	$cursor = $null
@@ -275,6 +287,8 @@ function VIGlobalPaste (){
 				$_.Replace("`t",'  ') + "`n" )
 	}
 }
+# }}}
+
 Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', 'VIChangeInnerBlock', 'VIDeleteInnerBlock', 'VIChangeOuterBlock', 'VIDeleteOuterBlock', 'ViChangeSurround', 'ViDeleteSurround', 'VIGlobalYank', 'VIGlobalPaste'
 ################################################################################
 # CHANGELOG                                                                    #
