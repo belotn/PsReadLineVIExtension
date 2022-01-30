@@ -1,0 +1,8 @@
+TOPIC
+	about_PSReadLineVIExtension
+
+SHORT DESCRIPTION
+	Add some text manipulation binding to PSReadLine
+
+LONG DESCRIPTION
+	Add some text manipulation binding to PSReadLine
