@@ -1,3 +1,4 @@
+# {{{ Handler
 Set-PSReadLineKeyHandler -Chord "c,i" -ViMode Command `
 	-ScriptBlock { VIChangeInnerBlock }
 Set-PSReadLineKeyHandler -Chord "c,a" -ViMode Command `
@@ -20,6 +21,7 @@ Set-PSReadLineKeyHandler -Chord "+,p" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste }
 Set-PSReadLineKeyHandler -Chord "+,P" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste $true }
+#}}}
 $LocalShell = New-Object -ComObject wscript.shell
 ######################################################################
 # Section Function                                                   #
@@ -262,7 +264,7 @@ function ViDeleteSurround(){
 }
 # }}}
 
-# {{{ Global Clipboard 
+# {{{ Global Clipboard
 function VIGlobalYank (){
 	$line = $null
 	$cursor = $null
@@ -278,7 +280,7 @@ function VIGlobalPaste (){
 	$Line = $null
 	$Cursor = $null
 	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $Line,
-			[ref] $Cursor) 
+			[ref] $Cursor)
 	if($Before ){
 		[Microsoft.Powershell.PSConsoleReadline]::SetCursorPosition($Cursor -1)
 	}
@@ -291,6 +293,8 @@ function VIGlobalPaste (){
 
 Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', 'VIChangeInnerBlock', 'VIDeleteInnerBlock', 'VIChangeOuterBlock', 'VIDeleteOuterBlock', 'ViChangeSurround', 'ViDeleteSurround', 'VIGlobalYank', 'VIGlobalPaste'
 ################################################################################
+# Author - belot.nicolas@gmail.com                                             #
+################################################################################
 # CHANGELOG                                                                    #
 ################################################################################
 # DONE: Change Quotes declaration to be case sensitive (W)                     #
@@ -299,4 +303,12 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', 'VIChangeInnerBlock'
 # DONE: Use compatible Ps5 char range operator                                 #
 # DONE: Add function to access global clipboard                                #
 # DONE: Delete must add erase text in register  (VIDelete*)                    #
+################################################################################
+################################################################################
+# {{{CODING FORMAT                                                             #
+################################################################################
+# Variable = CamelCase                                                         #
+# TabSpace = 4                                                                 #
+# Max Line Width = 80                                                          #
+# Bracket Style : OTBS                                                         #
 ################################################################################
