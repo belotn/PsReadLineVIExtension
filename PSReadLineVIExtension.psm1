@@ -291,7 +291,10 @@ function VIGlobalPaste (){
 }
 # }}}
 
-Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', 'VIChangeInnerBlock', 'VIDeleteInnerBlock', 'VIChangeOuterBlock', 'VIDeleteOuterBlock', 'ViChangeSurround', 'ViDeleteSurround', 'VIGlobalYank', 'VIGlobalPaste'
+Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
+	'VIChangeInnerBlock', 'VIDeleteInnerBlock', 'VIChangeOuterBlock', `
+	'VIDeleteOuterBlock', 'ViChangeSurround', 'ViDeleteSurround', `
+	'VIGlobalYank', 'VIGlobalPaste'
 ################################################################################
 # Author - belot.nicolas@gmail.com                                             #
 ################################################################################
