@@ -304,7 +304,6 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', 'VIChangeInnerBlock'
 # DONE: Add function to access global clipboard                                #
 # DONE: Delete must add erase text in register  (VIDelete*)                    #
 ################################################################################
-################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
 # Variable = CamelCase                                                         #
