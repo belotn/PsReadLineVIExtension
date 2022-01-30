@@ -95,7 +95,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-          Tags = @('PSReadLine','VIMode')
+          Tags = @('PSReadLine','VIMode', 'VI', 'InnerText', 'OuterText', 'Glob', 'Binding', 'Surround', 'GlobalClipboard')
 
         # A URL to the license for this module.
         LicenseUri = 'https://github.com/belotn/PsReadLineVIExtension/blob/e880210b3f41cbacfdb0e42f9670bcaa10386119/LICENS'
@@ -107,7 +107,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'First Release'
+        ReleaseNotes = 'Third Version : correct bug in outertext functions'
 
         # Prerelease string of this module
         Prerelease = '-beta'
