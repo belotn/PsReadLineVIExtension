@@ -1,9 +1,16 @@
-Set-PSReadLineKeyHandler -Chord "c,i" -ViMode Command -ScriptBlock { VIChangeInnerBlock }
-Set-PSReadLineKeyHandler -Chord "c,a" -ViMode Command -ScriptBlock { VIChangeOuterBlock }
-Set-PSReadLineKeyHandler -Chord "d,i" -ViMode Command -ScriptBlock { VIDeleteInnerBlock }
-Set-PSReadLineKeyHandler -Chord "d,a" -ViMode Command -ScriptBlock { VIDeleteOuterBlock }
-Set-PSReadLineKeyHandler -Chord "c,s" -ViMode Command -ScriptBlock { VIChangeSurround }
-Set-PSReadLineKeyHandler -Chord "d,s" -ViMode Command -ScriptBlock { VIDeleteSurround }
+# {{{ Handler
+Set-PSReadLineKeyHandler -Chord "c,i" -ViMode Command `
+	-ScriptBlock { VIChangeInnerBlock }
+Set-PSReadLineKeyHandler -Chord "c,a" -ViMode Command `
+	-ScriptBlock { VIChangeOuterBlock }
+Set-PSReadLineKeyHandler -Chord "d,i" -ViMode Command `
+	-ScriptBlock { VIDeleteInnerBlock }
+Set-PSReadLineKeyHandler -Chord "d,a" -ViMode Command `
+	-ScriptBlock { VIDeleteOuterBlock }
+Set-PSReadLineKeyHandler -Chord "c,s" -ViMode Command `
+	-ScriptBlock { VIChangeSurround }
+Set-PSReadLineKeyHandler -Chord "d,s" -ViMode Command `
+	-ScriptBlock { VIDeleteSurround }
 Set-PSReadLineKeyHandler -Chord "Ctrl+a" -ViMode Command `
 	-ScriptBlock { VIIncrement $args[0] $args[1] }
 Set-PSReadLineKeyHandler -Chord "Ctrl+x" -ViMode Command `
@@ -14,10 +21,13 @@ Set-PSReadLineKeyHandler -Chord "+,p" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste }
 Set-PSReadLineKeyHandler -Chord "+,P" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste $true }
+#}}}
 $LocalShell = New-Object -ComObject wscript.shell
 ######################################################################
 # Section Function                                                   #
 ######################################################################
+# {{{ Increment/decrement
+
 function VIDecrement( $key , $arg ){
 	[int]$numericArg = 0
 	[Microsoft.PowerShell.PSConsoleReadLine]::TryGetArgAsInt($arg,
@@ -57,14 +67,16 @@ function VIIncrement( $key , $arg ){
 				$EndChar - $StartChar, $nextVal.toString() )
 	[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($EndChar - 1)
 }
+# }}}
 
+# {{{ InnerBlock
 function VIChangeInnerBlock(){
 	VIDeleteInnerBlock
 	[Microsoft.PowerShell.PSConsoleReadLine]::ViInsertMode()
 }
 
 function VIDeleteInnerBlock(){
-	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'Z' |% { [char]$_ }) -join '' 
+	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'Z' |% { [char]$_ }) -join ''
 	$quotes = New-Object system.collections.hashtable
 	$quotes["'"] = @("'","'")
 	$quotes['"'] = @('"','"')
@@ -104,10 +116,10 @@ function VIDeleteInnerBlock(){
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar )
 		if($quote.toString() -eq 'w'){
-			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()		
+			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()
 		}elseif( $quote.toString() -eq 'W'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
-		}elseif($quote.toString() -eq '"' -or $quote.toString() -eq "'" ){ 
+		}elseif($quote.toString() -eq '"' -or $quote.toString() -eq "'" ){
 			$LocalShell.SendKeys($quote)
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
 		}elseif( $quote.toString() -eq '(' -or $quote.toString() -eq '[' -or `
@@ -125,6 +137,10 @@ function VIDeleteInnerBlock(){
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($StartChar)
 	}
 }
+
+# }}}
+
+# {{{ OuterBlock
 
 function VIChangeOuterBlock(){
 	VIDeleteOuterBlock
@@ -159,22 +175,26 @@ function VIDeleteOuterBlock(){
 			$StartChar=$Line.LastIndexOf($OpeningQuotes, $Cursor)
 		}
 		if(($OpeningQuotes.Length -gt 1 -or $quote -eq 'W') -and $EndChar -eq 0){
-			$EndChar = $Line.Length 
+			$EndChar = $Line.Length
 		}
 		if(($OpeningQuotes.Length -gt 1 -or $quote -eq 'W') -and $StartChar -lt 0){
-			$StartChar = 0 
+			$StartChar = 0
 		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar + 1)
 		if($quote.toString() -eq 'w'){
-			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()		
+			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()
 		}elseif( $quote.toString() -eq 'W'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
-		}elseif($quote.toString() -eq '"' -or $quote.toString() -eq "'" ){ 
+		}elseif($quote.toString() -eq '"' -or $quote.toString() -eq "'" ){
+			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
+					$StartChar )
 			$LocalShell.SendKeys($quote)
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
 		}elseif( $quote.toString() -eq '(' -or $quote.toString() -eq '[' -or `
 				$quote.toString() -eq '{' ){
+			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
+					$StartChar )
 			$LocalShell.SendKeys("{$($ClosingQuotes.toString())}")
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
 		} elseif( $quote.toString() -eq 'C') {
@@ -187,7 +207,9 @@ function VIDeleteOuterBlock(){
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($StartChar)
 	}
 }
+# }}}
 
+# {{{ Surround
 function ViChangeSurround(){
 	# inspired by tpope vim-surround
 	# https://github.com/tpope/vim-surround
@@ -239,13 +261,15 @@ function ViDeleteSurround(){
 		1,'')
 	[Microsoft.PowerShell.PSConsoleReadLine]::Replace($EndChar - 1, `
 		1,'' )
-    [Microsoft.PowerShell.PSConsoleReadLine]::Yank
 }
+# }}}
 
+# {{{ Global Clipboard
 function VIGlobalYank (){
 	$line = $null
-	$cursor = $null 
-	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $line, [ref] $cursor) 
+	$cursor = $null
+	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $line,
+			[ref] $cursor)
 	Set-Clipboard $line
 }
 
@@ -254,8 +278,9 @@ function VIGlobalPaste (){
 		$Before=$false
 	)
 	$Line = $null
-	$Cursor = $null 
-	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $Line, [ref] $Cursor) 
+	$Cursor = $null
+	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $Line,
+			[ref] $Cursor)
 	if($Before ){
 		[Microsoft.Powershell.PSConsoleReadline]::SetCursorPosition($Cursor -1)
 	}
@@ -264,7 +289,14 @@ function VIGlobalPaste (){
 				$_.Replace("`t",'  ') + "`n" )
 	}
 }
-Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', 'VIChangeInnerBlock', 'VIDeleteInnerBlock', 'VIChangeOuterBlock', 'VIDeleteOuterBlock', 'ViChangeSurround', 'ViDeleteSurround', 'VIGlobalYank', 'VIGlobalPaste'
+# }}}
+
+Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
+	'VIChangeInnerBlock', 'VIDeleteInnerBlock', 'VIChangeOuterBlock', `
+	'VIDeleteOuterBlock', 'ViChangeSurround', 'ViDeleteSurround', `
+	'VIGlobalYank', 'VIGlobalPaste'
+################################################################################
+# Author - belot.nicolas@gmail.com                                             #
 ################################################################################
 # CHANGELOG                                                                    #
 ################################################################################
@@ -273,5 +305,12 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', 'VIChangeInnerBlock'
 #       Should be ciC and diC                                                  #
 # DONE: Use compatible Ps5 char range operator                                 #
 # DONE: Add function to access global clipboard                                #
-# Done: Delete must add erase text in register  (VIDelete*)                    #
+# DONE: Delete must add erase text in register  (VIDelete*)                    #
+################################################################################
+# {{{CODING FORMAT                                                             #
+################################################################################
+# Variable = CamelCase                                                         #
+# TabSpace = 4                                                                 #
+# Max Line Width = 80                                                          #
+# Bracket Style : OTBS                                                         #
 ################################################################################
