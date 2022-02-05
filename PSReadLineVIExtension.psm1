@@ -318,7 +318,8 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Add function to access global clipboard                                #
 # DONE: Delete must add erase text in register  (VIDelete*)                    #
 # FIXED: Outter Text malfunction when word contains special char               #
-# FIXED: [cd]iW do nothing                                                     # 
+# FIXED: [cd]iW do nothing                                                     #
+# DONE: Change Inner Cap should work with endOfWord                            #
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
