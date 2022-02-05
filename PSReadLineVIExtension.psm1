@@ -29,6 +29,7 @@ $LocalShell = New-Object -ComObject wscript.shell
 # {{{ Increment/decrement
 
 function VIDecrement( $key , $arg ){
+	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'z' |% { [char]$_ }) -join ''
 	[int]$numericArg = 0
 	[Microsoft.PowerShell.PSConsoleReadLine]::TryGetArgAsInt($arg,
 		  [ref]$numericArg, 1)
@@ -36,10 +37,13 @@ function VIDecrement( $key , $arg ){
 	$Cursor = $Null
 	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
 		[ref]$Cursor)
-	$OpeningQuote = ' '
-	$ClosingQuote = ' '
-	$EndChar = $Line.indexOf($ClosingQuote, $Cursor)
-	$StartChar = $Line.LastIndexOf($OpeningQuote, $Cursor) + 1
+	# $OpeningQuote = ' '
+	# $ClosingQuote = ' '
+	$EndChar = $Line.indexOfAny($Caps, $Cursor)
+	$StartChar = $Line.LastIndexOfAny($Caps, $Cursor) + 1
+	if($EndChar -lt 0 -and $StartChar -gt 0){
+		$EndChar = $Line.Length
+	}
 	[int]$nextVal = $Line.Substring($StartChar, $EndChar - $StartChar)
 	$nextVal -= $numericArg
 
@@ -49,6 +53,7 @@ function VIDecrement( $key , $arg ){
 }
 
 function VIIncrement( $key , $arg ){
+	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'z' |% { [char]$_ }) -join ''
 	[int]$numericArg = 1
 	[Microsoft.PowerShell.PSConsoleReadLine]::TryGetArgAsInt($arg,
 		  [ref]$numericArg, 1)
@@ -56,10 +61,13 @@ function VIIncrement( $key , $arg ){
 	$Cursor = $Null
 	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
 		[ref]$Cursor)
-	$OpeningQuote=' '
-	$ClosingQuote=' '
-	$EndChar=$Line.indexOf($ClosingQuote, $Cursor)
-	$StartChar=$Line.LastIndexOf($OpeningQuote, $Cursor) + 1
+	# $OpeningQuote=' '
+	# $ClosingQuote=' '
+	$EndChar = $Line.indexOfAny($Caps, $Cursor)
+	$StartChar = $Line.LastIndexOfAny($Caps, $Cursor) + 1
+	if($EndChar -lt 0 -and $StartChar -gt 0){
+		$EndChar = $Line.Length
+	}
 	[int]$nextVal = $Line.Substring($StartChar, $EndChar - $StartChar)
 	$nextVal += $numericArg
 
@@ -325,6 +333,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Change Inner Cap should work with endOfWord                            #
 # DONE: Change Inner Cap should work with endOfLine                            #
 # TODO: (In|De)Crement do not work at end of line                              #
+# TODO: Use all exception numeric for inc or dec                               #
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
