@@ -324,6 +324,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: [cd]iW do nothing                                                     #
 # DONE: Change Inner Cap should work with endOfWord                            #
 # DONE: Change Inner Cap should work with endOfLine                            #
+# TODO: (In|De)Crement do not work at end of line                              #
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
