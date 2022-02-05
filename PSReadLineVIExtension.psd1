@@ -12,7 +12,7 @@
 RootModule = 'PSReadLineVIExtension.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.0.3'
+ModuleVersion = '0.0.4'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -98,7 +98,7 @@ PrivateData = @{
           Tags = @('PSReadLine','VIMode', 'VI', 'InnerText', 'OuterText', 'Glob', 'Binding', 'Surround', 'GlobalClipboard')
 
         # A URL to the license for this module.
-        LicenseUri = 'https://github.com/belotn/PsReadLineVIExtension/blob/e880210b3f41cbacfdb0e42f9670bcaa10386119/LICENS'
+        LicenseUri = 'https://github.com/belotn/PsReadLineVIExtension/blob/e880210b3f41cbacfdb0e42f9670bcaa10386119/LICENSE'
 
         # A URL to the main website for this project.
         ProjectUri = 'https://github.com/belotn/PsReadLineVIExtension'
@@ -107,7 +107,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'Third Version : correct bug in outertext functions'
+        ReleaseNotes = 'Latest prerelease : correction on outter text Glob and inner text glob'
 
         # Prerelease string of this module
         Prerelease = '-beta'

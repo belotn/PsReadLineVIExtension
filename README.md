@@ -12,6 +12,7 @@ id est : ci di
 " ' ( [ { : Manipulate text between selected bracket
 ### Supported mouvement key
 w W : Manipulate text between non word character ou blank character
+
 C 	: Manipulate text between non word and Caps 
 ## Outer Text
 Appends binding to manipulate outer text

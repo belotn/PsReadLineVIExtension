@@ -104,20 +104,26 @@ function VIDeleteInnerBlock(){
 		}else{
 			$StartChar=$Line.LastIndexOf($OpeningQuotes, $Cursor) + 1
 		}
-		if($OpeningQuotes.Length -eq 1 -and ( $StartChar -eq 0 -or $EndChar -eq -1)){
-			Return
-		}
-		if($OpeningQuotes.Length -gt 1 -and $EndChar -eq -1){
+		if(($OpeningQuotes.Length -gt 1 -or $quote -ceq 'W') -and $EndChar -eq 0){
 			$EndChar = $Line.Length
 		}
+		if(($OpeningQuotes.Length -gt 1 -or $quote -ceq 'W') -and $StartChar -lt 0){
+			$StartChar = 0
+		}
+		# if($OpeningQuotes.Length -eq 1 -and ( $StartChar -eq 0 -or $EndChar -eq -1)){
+		# 	Return
+		# }
+		# if($OpeningQuotes.Length -gt 1 -and $EndChar -eq -1){
+		# 	$EndChar = $Line.Length
+		# }
 		if( $quote.toString() -eq 'C'){
 			$StartChar -= 1
 		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar )
-		if($quote.toString() -eq 'w'){
+		if($quote.toString() -ceq 'w'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()
-		}elseif( $quote.toString() -eq 'W'){
+		}elseif( $quote.toString() -ceq 'W'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
 		}elseif($quote.toString() -eq '"' -or $quote.toString() -eq "'" ){
 			$LocalShell.SendKeys($quote)
@@ -174,17 +180,22 @@ function VIDeleteOuterBlock(){
 		}else{
 			$StartChar=$Line.LastIndexOf($OpeningQuotes, $Cursor)
 		}
-		if(($OpeningQuotes.Length -gt 1 -or $quote -eq 'W') -and $EndChar -eq 0){
+		if(($OpeningQuotes.Length -gt 1 -or $quote -ceq 'W') -and $EndChar -eq 0){
 			$EndChar = $Line.Length
 		}
-		if(($OpeningQuotes.Length -gt 1 -or $quote -eq 'W') -and $StartChar -lt 0){
+		if(($OpeningQuotes.Length -gt 1 -or $quote -ceq 'W') -and $StartChar -lt 0){
 			$StartChar = 0
 		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar + 1)
-		if($quote.toString() -eq 'w'){
+		if($quote.toString() -ceq 'w'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()
-		}elseif( $quote.toString() -eq 'W'){
+		}elseif( $quote.toString() -ceq 'W'){
+			if($StartChar -eq 0){
+				$StartChar--
+			}
+			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
+					$StartChar + 1 )
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
 		}elseif($quote.toString() -eq '"' -or $quote.toString() -eq "'" ){
 			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
@@ -306,6 +317,8 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Use compatible Ps5 char range operator                                 #
 # DONE: Add function to access global clipboard                                #
 # DONE: Delete must add erase text in register  (VIDelete*)                    #
+# FIXED: Outter Text malfunction when word contains special char               #
+# FIXED: [cd]iW do nothing                                                     # 
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
