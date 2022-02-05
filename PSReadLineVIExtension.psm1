@@ -104,7 +104,7 @@ function VIDeleteInnerBlock(){
 		}else{
 			$StartChar=$Line.LastIndexOf($OpeningQuotes, $Cursor) + 1
 		}
-		if(($OpeningQuotes.Length -gt 1 -or $quote -ceq 'W') -and $EndChar -eq 0){
+		if(($OpeningQuotes.Length -gt 1 -or $quote -ceq 'W' -or $quote -ceq 'C') -and $EndChar -lt 0){
 			$EndChar = $Line.Length
 		}
 		if(($OpeningQuotes.Length -gt 1 -or $quote -ceq 'W') -and $StartChar -lt 0){
@@ -133,9 +133,12 @@ function VIDeleteInnerBlock(){
 			$LocalShell.SendKeys("{$($ClosingQuotes.toString())}")
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
 		} elseif( $quote.toString() -eq 'C') {
-			$LocalShell.SendKeys($Line[$EndChar])
-			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
-
+			if($EndChar -eq $Line.Length){
+				[Microsoft.PowerShell.PSConsoleReadLine]::DeleteToEnd()
+			}else{
+				$LocalShell.SendKeys($Line[$EndChar])
+				[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
+			}
 		 } #else {
 			# [Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar,`
 			# 		$EndChar - $StartChar, '')
@@ -320,6 +323,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: Outter Text malfunction when word contains special char               #
 # FIXED: [cd]iW do nothing                                                     #
 # DONE: Change Inner Cap should work with endOfWord                            #
+# DONE: Change Inner Cap should work with endOfLine                            #
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
