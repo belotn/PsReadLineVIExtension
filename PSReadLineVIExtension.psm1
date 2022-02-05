@@ -104,12 +104,18 @@ function VIDeleteInnerBlock(){
 		}else{
 			$StartChar=$Line.LastIndexOf($OpeningQuotes, $Cursor) + 1
 		}
-		if($OpeningQuotes.Length -eq 1 -and ( $StartChar -eq 0 -or $EndChar -eq -1)){
-			Return
-		}
-		if($OpeningQuotes.Length -gt 1 -and $EndChar -eq -1){
+		if(($OpeningQuotes.Length -gt 1 -or $quote -ceq 'W') -and $EndChar -eq 0){
 			$EndChar = $Line.Length
 		}
+		if(($OpeningQuotes.Length -gt 1 -or $quote -ceq 'W') -and $StartChar -lt 0){
+			$StartChar = 0
+		}
+		# if($OpeningQuotes.Length -eq 1 -and ( $StartChar -eq 0 -or $EndChar -eq -1)){
+		# 	Return
+		# }
+		# if($OpeningQuotes.Length -gt 1 -and $EndChar -eq -1){
+		# 	$EndChar = $Line.Length
+		# }
 		if( $quote.toString() -eq 'C'){
 			$StartChar -= 1
 		}
@@ -312,7 +318,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Add function to access global clipboard                                #
 # DONE: Delete must add erase text in register  (VIDelete*)                    #
 # FIXED: Outter Text malfunction when word contains special char               #
-# FIXME: [cd]iW do nothing                                                     # 
+# FIXED: [cd]iW do nothing                                                     # 
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
