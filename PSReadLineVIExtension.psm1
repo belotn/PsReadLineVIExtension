@@ -325,15 +325,20 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Change Quotes declaration to be case sensitive (W)                     #
 # DONE: Add Handler for Next Camel Word (Maybe cd and cD)                      #
 #       Should be ciC and diC                                                  #
+# VERSION: 0.0.1                                                               #
 # DONE: Use compatible Ps5 char range operator                                 #
+# VERSION: 0.0.2                                                               #
 # DONE: Add function to access global clipboard                                #
 # DONE: Delete must add erase text in register  (VIDelete*)                    #
+# VERSION: 0.0.3                                                               #
 # FIXED: Outter Text malfunction when word contains special char               #
 # FIXED: [cd]iW do nothing                                                     #
 # DONE: Change Inner Cap should work with endOfWord                            #
 # DONE: Change Inner Cap should work with endOfLine                            #
-# TODO: (In|De)Crement do not work at end of line                              #
-# TODO: Use all exception numeric for inc or dec                               #
+# VERSION: 0.0.4                                                               #
+# DONE: (In|De)Crement do not work at end of line                              #
+# DONE: Use all exception numeric for inc or dec                               #
+# HEAD: 0.0.5                                                                  #
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
