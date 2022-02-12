@@ -6,3 +6,13 @@ SHORT DESCRIPTION
 
 LONG DESCRIPTION
 	Add some text manipulation binding to PSReadLine
+	ci/di
+		InnerTextManipulation
+		Supported mouvement '"'[({ wWC
+	ca/da}
+		OuterTextManipulation
+		Supported mouvement '"'[({ wWC
+	cs/ds
+		Surrouding action 
+	ctrl+a/ctrl+x
+		Increment Decrement number under cursor
