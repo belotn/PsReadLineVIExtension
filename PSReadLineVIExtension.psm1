@@ -143,11 +143,13 @@ function VIDeleteInnerBlock(){
 		} elseif( $quote.toString() -eq 'C') {
 			if($EndChar -eq $Line.Length){
 				[Microsoft.PowerShell.PSConsoleReadLine]::DeleteToEnd()
-			}else{
+			}elseif($Line[$EndChar] -eq ' '){
+				[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()
+			}else {
 				$LocalShell.SendKeys($Line[$EndChar])
 				[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
 			}
-		 } #else {
+		} #else {
 			# [Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar,`
 			# 		$EndChar - $StartChar, '')
 		# }
@@ -338,7 +340,9 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # VERSION: 0.0.4                                                               #
 # DONE: (In|De)Crement do not work at end of line                              #
 # DONE: Use all exception numeric for inc or dec                               #
-# HEAD: 0.0.5                                                                  #
+# VERSION: 1.0.0                                                               #
+# DONE: ciC problem with end of word                                           #
+# HEAD: 1.0.1                                                                  #
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
