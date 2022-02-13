@@ -305,12 +305,12 @@ function VIGlobalPaste (){
 	$Cursor = $null
 	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $Line,
 			[ref] $Cursor)
-	if($Before ){
-		[Microsoft.Powershell.PSConsoleReadline]::SetCursorPosition($Cursor -1)
+	if(-not ($Before )){
+		[Microsoft.Powershell.PSConsoleReadline]::SetCursorPosition($Cursor + 1)
 	}
 	(Get-Clipboard).Split("`n") |% {
 		[Microsoft.Powershell.PSConsoleReadline]::Insert( `
-				$_.Replace("`t",'  ') + "`n" )
+				$_.Replace("`t",'  ') )
 	}
 }
 # }}}
@@ -342,6 +342,8 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Use all exception numeric for inc or dec                               #
 # VERSION: 1.0.0                                                               #
 # DONE: ciC problem with end of word                                           #
+# DONE: Global paste does not insert at correct place                          #
+# DONE: Remove new line after paste                                            #
 # HEAD: 1.0.1                                                                  #
 ################################################################################
 # {{{CODING FORMAT                                                             #
