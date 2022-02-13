@@ -30,49 +30,45 @@ $LocalShell = New-Object -ComObject wscript.shell
 
 function VIDecrement( $key , $arg ){
 	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'z' |% { [char]$_ }) -join ''
-	[int]$numericArg = 0
+	[int]$NumericArg = 0
 	[Microsoft.PowerShell.PSConsoleReadLine]::TryGetArgAsInt($arg,
 		  [ref]$numericArg, 1)
 	$Line = $Null
 	$Cursor = $Null
 	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
 		[ref]$Cursor)
-	# $OpeningQuote = ' '
-	# $ClosingQuote = ' '
 	$EndChar = $Line.indexOfAny($Caps, $Cursor)
 	$StartChar = $Line.LastIndexOfAny($Caps, $Cursor) + 1
 	if($EndChar -lt 0 -and $StartChar -gt 0){
 		$EndChar = $Line.Length
 	}
-	[int]$nextVal = $Line.Substring($StartChar, $EndChar - $StartChar)
-	$nextVal -= $numericArg
+	[int]$NextVal = $Line.SubString($StartChar, $EndChar - $StartChar)
+	$NextVal -= $NumericArg
 
 	[Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar,`
-				$EndChar - $StartChar, $nextVal.toString() )
+				$EndChar - $StartChar, $nextVal.ToString() )
 	[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($EndChar - 1)
 }
 
 function VIIncrement( $key , $arg ){
 	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'z' |% { [char]$_ }) -join ''
-	[int]$numericArg = 1
+	[int]$NumericArg = 1
 	[Microsoft.PowerShell.PSConsoleReadLine]::TryGetArgAsInt($arg,
 		  [ref]$numericArg, 1)
 	$Line = $Null
 	$Cursor = $Null
 	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
 		[ref]$Cursor)
-	# $OpeningQuote=' '
-	# $ClosingQuote=' '
-	$EndChar = $Line.indexOfAny($Caps, $Cursor)
+	$EndChar = $Line.IndexOfAny($Caps, $Cursor)
 	$StartChar = $Line.LastIndexOfAny($Caps, $Cursor) + 1
 	if($EndChar -lt 0 -and $StartChar -gt 0){
 		$EndChar = $Line.Length
 	}
-	[int]$nextVal = $Line.Substring($StartChar, $EndChar - $StartChar)
-	$nextVal += $numericArg
+	[int]$NextVal = $Line.SubString($StartChar, $EndChar - $StartChar)
+	$NextVal += $NumericArg
 
 	[Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar,`
-				$EndChar - $StartChar, $nextVal.toString() )
+				$EndChar - $StartChar, $NextVal.ToString() )
 	[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($EndChar - 1)
 }
 # }}}
@@ -85,62 +81,58 @@ function VIChangeInnerBlock(){
 
 function VIDeleteInnerBlock(){
 	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'Z' |% { [char]$_ }) -join ''
-	$quotes = New-Object system.collections.hashtable
-	$quotes["'"] = @("'","'")
-	$quotes['"'] = @('"','"')
-	$quotes["("] = @('(',')')
-	$quotes["{"] = @('{','}')
-	$quotes["["] = @('[',']')
-	$quotes["w"] = @("$[({})]-._ '```"", "$[({})]-._ '```"")
-	$quotes["W"] = @(' ', ' ')
-	$quotes['C'] = @($Caps, $Caps)
-	$quote = ([Console]::ReadKey($true)).KeyChar
-	if( $quotes.ContainsKey($quote.toString())){
+	$Quotes = New-Object system.collections.hashtable
+	$Quotes["'"] = @("'","'")
+	$Quotes['"'] = @('"','"')
+	$Quotes["("] = @('(',')')
+	$Quotes["{"] = @('{','}')
+	$Quotes["["] = @('[',']')
+	$Quotes["w"] = @("$[({})]-._ '```"", "$[({})]-._ '```"")
+	$Quotes["W"] = @(' ', ' ')
+	$Quotes['C'] = @($Caps, $Caps)
+	$Quote = ([Console]::ReadKey($true)).KeyChar
+	if( $Quotes.ContainsKey($quote.toString())){
 		$Line = $Null
 		$Cursor = $Null
 		[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
 				[ref]$Cursor)
-		$OpeningQuotes = $quotes[$quote.ToString()][0]
-		$ClosingQuotes = $quotes[$quote.ToString()][1]
+		$OpeningQuotes = $Quotes[$Quote.ToString()][0]
+		$ClosingQuotes = $Quotes[$Quote.ToString()][1]
 		if($ClosingQuotes.length -gt 1){
-			$EndChar=$Line.indexOfAny($ClosingQuotes, $Cursor)
+			$EndChar=$Line.IndexOfAny($ClosingQuotes, $Cursor)
 		}else{
-			$EndChar=$Line.indexOf($ClosingQuotes, $Cursor)
+			$EndChar=$Line.IndexOf($ClosingQuotes, $Cursor)
 		}
-		if($OpeningQuotes.length -gt 1){
+		if($OpeningQuotes.Length -gt 1){
 			$StartChar=$Line.LastIndexOfAny($OpeningQuotes, $Cursor) + 1
 		}else{
 			$StartChar=$Line.LastIndexOf($OpeningQuotes, $Cursor) + 1
 		}
-		if(($OpeningQuotes.Length -gt 1 -or $quote -ceq 'W' -or $quote -ceq 'C') -and $EndChar -lt 0){
+		if(($OpeningQuotes.Length -gt 1 -or $Quote -ceq 'W' -or $Quote -ceq 'C'`
+				) -and $EndChar -lt 0){
 			$EndChar = $Line.Length
 		}
-		if(($OpeningQuotes.Length -gt 1 -or $quote -ceq 'W') -and $StartChar -lt 0){
+		if(($OpeningQuotes.Length -gt 1 -or $Quote -ceq 'W')`
+				-and $StartChar -lt 0){
 			$StartChar = 0
 		}
-		# if($OpeningQuotes.Length -eq 1 -and ( $StartChar -eq 0 -or $EndChar -eq -1)){
-		# 	Return
-		# }
-		# if($OpeningQuotes.Length -gt 1 -and $EndChar -eq -1){
-		# 	$EndChar = $Line.Length
-		# }
-		if( $quote.toString() -eq 'C'){
+		if( $Quote.ToString() -eq 'C'){
 			$StartChar -= 1
 		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar )
-		if($quote.toString() -ceq 'w'){
+		if($Quote.toString() -ceq 'w'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()
-		}elseif( $quote.toString() -ceq 'W'){
+		}elseif( $Quote.ToString() -ceq 'W'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
-		}elseif($quote.toString() -eq '"' -or $quote.toString() -eq "'" ){
-			$LocalShell.SendKeys($quote)
+		}elseif($Quote.ToString() -eq '"' -or $Quote.ToString() -eq "'" ){
+			$LocalShell.SendKeys($Quote)
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
-		}elseif( $quote.toString() -eq '(' -or $quote.toString() -eq '[' -or `
-				$quote.toString() -eq '{' ){
+		}elseif( $Quote.ToString() -eq '(' -or $Quote.ToString() -eq '[' -or `
+				$Quote.ToString() -eq '{' ){
 			$LocalShell.SendKeys("{$($ClosingQuotes.toString())}")
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
-		} elseif( $quote.toString() -eq 'C') {
+		} elseif( $Quote.ToString() -eq 'C') {
 			if($EndChar -eq $Line.Length){
 				[Microsoft.PowerShell.PSConsoleReadLine]::DeleteToEnd()
 			}elseif($Line[$EndChar] -eq ' '){
@@ -149,10 +141,7 @@ function VIDeleteInnerBlock(){
 				$LocalShell.SendKeys($Line[$EndChar])
 				[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
 			}
-		} #else {
-			# [Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar,`
-			# 		$EndChar - $StartChar, '')
-		# }
+		} 
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($StartChar)
 	}
 }
@@ -167,67 +156,67 @@ function VIChangeOuterBlock(){
 }
 
 function VIDeleteOuterBlock(){
-	$quotes = New-Object system.collections.hashtable
-	$quotes["'"] = @("'","'")
-	$quotes['"'] = @('"','"')
-	$quotes["("] = @('(',')')
-	$quotes["{"] = @('{','}')
-	$quotes["["] = @('[',']')
-	$quotes["w"] = @("$[({})]-._ '```"\/", "$[({})]-._ '```"\/")
-	$quotes["W"] = @(' ', ' ')
-	$quote = ([Console]::ReadKey($true)).KeyChar
-	if( $quotes.ContainsKey($quote.toString())){
+	$Quotes = New-Object system.collections.hashtable
+	$Quotes["'"] = @("'","'")
+	$Quotes['"'] = @('"','"')
+	$Quotes["("] = @('(',')')
+	$Quotes["{"] = @('{','}')
+	$Quotes["["] = @('[',']')
+	$Quotes["w"] = @("$[({})]-._ '```"\/", "$[({})]-._ '```"\/")
+	$Quotes["W"] = @(' ', ' ')
+	$Quote = ([Console]::ReadKey($true)).KeyChar
+	if( $Quotes.ContainsKey($quote.ToString())){
 		$Line = $Null
 		$Cursor = $Null
 		[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
 				[ref]$Cursor)
-		$OpeningQuotes = $quotes[$quote.ToString()][0]
-		$ClosingQuotes = $quotes[$quote.ToString()][1]
-		if($ClosingQuotes.length -gt 1){
-			$EndChar=$Line.indexOfAny($ClosingQuotes, $Cursor) + 1
+		$OpeningQuotes = $Quotes[$Quote.ToString()][0]
+		$ClosingQuotes = $Quotes[$Quote.ToString()][1]
+		if($ClosingQuotes.Length -gt 1){
+			$EndChar=$Line.IndexOfAny($ClosingQuotes, $Cursor) + 1
 		}else{
-			$EndChar=$Line.indexOf($ClosingQuotes, $Cursor) +1
+			$EndChar=$Line.IndexOf($ClosingQuotes, $Cursor) +1
 		}
 		if($OpeningQuotes.length -gt 1){
 			$StartChar=$Line.LastIndexOfAny($OpeningQuotes, $Cursor)
 		}else{
 			$StartChar=$Line.LastIndexOf($OpeningQuotes, $Cursor)
 		}
-		if(($OpeningQuotes.Length -gt 1 -or $quote -ceq 'W') -and $EndChar -eq 0){
+		if(($OpeningQuotes.Length -gt 1 -or $Quote -ceq 'W') `
+				-and $EndChar -eq 0){
 			$EndChar = $Line.Length
 		}
-		if(($OpeningQuotes.Length -gt 1 -or $quote -ceq 'W') -and $StartChar -lt 0){
+		if(($OpeningQuotes.Length -gt 1 -or $Quote -ceq 'W')`
+				-and $StartChar -lt 0){
 			$StartChar = 0
 		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar + 1)
-		if($quote.toString() -ceq 'w'){
+		if($Quote.toString() -ceq 'w'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()
-		}elseif( $quote.toString() -ceq 'W'){
+		}elseif( $Quote.toString() -ceq 'W'){
 			if($StartChar -eq 0){
 				$StartChar--
 			}
 			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar + 1 )
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
-		}elseif($quote.toString() -eq '"' -or $quote.toString() -eq "'" ){
+		}elseif($Quote.toString() -eq '"' -or $Quote.toString() -eq "'" ){
 			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar )
-			$LocalShell.SendKeys($quote)
+			$LocalShell.SendKeys($Quote)
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
-		}elseif( $quote.toString() -eq '(' -or $quote.toString() -eq '[' -or `
-				$quote.toString() -eq '{' ){
+		}elseif( $Quote.ToString() -eq '(' -or $Quote.ToString() -eq '[' -or `
+				$Quote.ToString() -eq '{' ){
 			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar )
 			$LocalShell.SendKeys("{$($ClosingQuotes.toString())}")
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
-		} elseif( $quote.toString() -eq 'C') {
+		} elseif( $Quote.toString() -eq 'C') {
 			$LocalShell.SendKeys($Line[$EndChar])
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
 
-		} #else {
-		# [Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar, `
-		# 		$EndChar - $StartChar, '')
+		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($StartChar)
 	}
 }
@@ -237,7 +226,7 @@ function VIDeleteOuterBlock(){
 function ViChangeSurround(){
 	# inspired by tpope vim-surround
 	# https://github.com/tpope/vim-surround
-	$quotes = @{
+	$Quotes = @{
 		"'" = @("'","'");
 		'"'= @('"','"');
 		"(" = @('(',')');
@@ -250,10 +239,10 @@ function ViChangeSurround(){
 	$Replace = ([Console]::ReadKey($true)).KeyChar
 	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
 			[ref]$Cursor)
-	$SearchOpeningQuotes = $quotes[$Search.ToString()][0]
-	$SearchClosingQuotes = $quotes[$Search.ToString()][1]
-	$ReplaceOpeningQuotes = $quotes[$Replace.ToString()][0]
-	$ReplaceClosingQuotes = $quotes[$Replace.ToString()][1]
+	$SearchOpeningQuotes = $Quotes[$Search.ToString()][0]
+	$SearchClosingQuotes = $Quotes[$Search.ToString()][1]
+	$ReplaceOpeningQuotes = $Quotes[$Replace.ToString()][0]
+	$ReplaceClosingQuotes = $Quotes[$Replace.ToString()][1]
 	$EndChar=$Line.indexOf($SearchClosingQuotes, $Cursor)
 	$StartChar=$Line.LastIndexOf($SearchOpeningQuotes, $Cursor)
 	[Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar, `
@@ -265,7 +254,7 @@ function ViChangeSurround(){
 function ViDeleteSurround(){
 	# inspired by tpope vim-surround
 	# https://github.com/tpope/vim-surround
-	$quotes = @{
+	$Quotes = @{
 		"'" = @("'","'");
 		'"'= @('"','"');
 		"(" = @('(',')');
@@ -277,8 +266,8 @@ function ViDeleteSurround(){
 	$Search = ([Console]::ReadKey($true)).KeyChar
 	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
 			[ref]$Cursor)
-	$SearchOpeningQuotes = $quotes[$Search.ToString()][0]
-	$SearchClosingQuotes = $quotes[$Search.ToString()][1]
+	$SearchOpeningQuotes = $Quotes[$Search.ToString()][0]
+	$SearchClosingQuotes = $Quotes[$Search.ToString()][1]
 	$EndChar=$Line.indexOf($SearchClosingQuotes, $Cursor)
 	$StartChar=$Line.LastIndexOf($SearchOpeningQuotes, $Cursor)
 	[Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar, `
@@ -290,25 +279,25 @@ function ViDeleteSurround(){
 
 # {{{ Global Clipboard
 function VIGlobalYank (){
-	$line = $null
-	$cursor = $null
-	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $line,
-			[ref] $cursor)
-	Set-Clipboard $line
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $Line,
+			[ref] $Cursor)
+	Set-ClipBoard $Line
 }
 
 function VIGlobalPaste (){
 	param(
-		$Before=$false
+		$Before=$False
 	)
-	$Line = $null
-	$Cursor = $null
+	$Line = $Null
+	$Cursor = $Null
 	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $Line,
 			[ref] $Cursor)
 	if(-not ($Before )){
 		[Microsoft.Powershell.PSConsoleReadline]::SetCursorPosition($Cursor + 1)
 	}
-	(Get-Clipboard).Split("`n") |% {
+	(Get-ClipBoard).Split("`n") |% {
 		[Microsoft.Powershell.PSConsoleReadline]::Insert( `
 				$_.Replace("`t",'  ') )
 	}
