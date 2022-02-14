@@ -31,21 +31,50 @@ $LocalShell = New-Object -ComObject wscript.shell
 function VIDecrement( $key , $arg ){
 	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'z' | `
 		Foreach-Object { [char]$_ }) -join ''
+	$ConditionalStatements = @('elseif','if','else')
 	[int]$NumericArg = 0
 	[Microsoft.PowerShell.PSConsoleReadLine]::TryGetArgAsInt($arg,
-		  [ref]$numericArg, 1)
+		  [ref]$NumericArg, 1)
 	$Line = $Null
 	$Cursor = $Null
 	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
 		[ref]$Cursor)
 	$EndChar = $Line.indexOfAny($Caps, $Cursor)
 	$StartChar = $Line.LastIndexOfAny($Caps, $Cursor) + 1
+	$IsNumeric = $true
+	$IsConditionalStatement = $false
 	if($EndChar -lt 0 -and $StartChar -gt 0){
 		$EndChar = $Line.Length
+	}elseif($EndChar - $StartChar -le 0){
+		$IsNumeric = $false
+		$i = 0
+		While($i -lt $ConditionalStatements.Length -and `
+				-not ($isConditonialStatement )) {
+			$Statement = $ConditionalStatements[$i]
+			$FromStart = $Line.IndexOf($Statement, $Cursor)
+			$FromEnd = $Line.LastIndexOf($Statement,$Cursor)
+			if( $FromStart -ne -1 -or $FromEnd -ne -1){
+				if($FromStart -ne -1 ){
+					$StartChar = $FromStart
+				}else{
+					$StartChar = $FromEnd
+				}
+				$NextIndex = ($i - $NumericArg) % $ConditionalStatements.Length
+				$NextVal = $ConditionalStatements[$NextIndex]
+				$EndChar = $StartChar + $Statement.Length
+				$IsConditionalStatement = $true
+				break
+			}
+			$i++
+		}
 	}
-	[int]$NextVal = $Line.SubString($StartChar, $EndChar - $StartChar)
-	$NextVal -= $NumericArg
-
+	if( $IsNumeric -eq $false -and $IsConditionalStatement -eq $false){
+		return
+	}
+	if($IsNumeric){
+		[int]$NextVal = $Line.SubString($StartChar, $EndChar - $StartChar)
+		$NextVal -= $NumericArg
+	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar,`
 				$EndChar - $StartChar, $nextVal.ToString() )
 	[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($EndChar - 1)
@@ -54,21 +83,50 @@ function VIDecrement( $key , $arg ){
 function VIIncrement( $key , $arg ){
 	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'z' | `
 		Foreach-Object { [char]$_ }) -join ''
+	$ConditionalStatements = @('elseif','if','else')
 	[int]$NumericArg = 1
 	[Microsoft.PowerShell.PSConsoleReadLine]::TryGetArgAsInt($arg,
-		  [ref]$numericArg, 1)
+		  [ref]$NumericArg, 1)
 	$Line = $Null
 	$Cursor = $Null
 	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
 		[ref]$Cursor)
-	$EndChar = $Line.IndexOfAny($Caps, $Cursor)
+	$EndChar = $Line.indexOfAny($Caps, $Cursor)
 	$StartChar = $Line.LastIndexOfAny($Caps, $Cursor) + 1
+	$IsNumeric = $true
+	$IsConditionalStatement = $false
 	if($EndChar -lt 0 -and $StartChar -gt 0){
 		$EndChar = $Line.Length
+	}elseif($EndChar - $StartChar -le 0){
+		$IsNumeric = $false
+		$i = 0
+		While($i -lt $ConditionalStatements.Length -and `
+				-not ($isConditonialStatement )) {
+			$Statement = $ConditionalStatements[$i]
+			$FromStart = $Line.IndexOf($Statement, $Cursor)
+			$FromEnd = $Line.LastIndexOf($Statement,$Cursor)
+			if( $FromStart -ne -1 -or $FromEnd -ne -1){
+				if($FromStart -ne -1 ){
+					$StartChar = $FromStart
+				}else{
+					$StartChar = $FromEnd
+				}
+				$NextIndex = ($i + $NumericArg) % $ConditionalStatements.Length
+				$NextVal = $ConditionalStatements[$NextIndex]
+				$EndChar = $StartChar + $Statement.Length
+				$IsConditionalStatement = $true
+				break
+			}
+			$i++
+		}
 	}
-	[int]$NextVal = $Line.SubString($StartChar, $EndChar - $StartChar)
-	$NextVal += $NumericArg
-
+	if( $IsNumeric -eq $false -and $IsConditionalStatement -eq $false){
+		return
+	}
+	if($IsNumeric){
+		[int]$NextVal = $Line.SubString($StartChar, $EndChar - $StartChar)
+		$NextVal += $NumericArg
+	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::Replace($StartChar,`
 				$EndChar - $StartChar, $NextVal.ToString() )
 	[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($EndChar - 1)
@@ -336,6 +394,8 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: ciC problem with end of word                                          #
 # FIXED: Global paste does not insert at correct place                         #
 # FIXED: Remove new line after paste                                           #
+# FIXED: Increment/Decrement return error when cursor is not on number         #
+# TODO: Increment if/elseif/else                                               #
 # HEAD: 1.0.1                                                                  #
 ################################################################################
 # {{{CODING FORMAT                                                             #
