@@ -29,7 +29,8 @@ $LocalShell = New-Object -ComObject wscript.shell
 # {{{ Increment/decrement
 
 function VIDecrement( $key , $arg ){
-	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'z' |% { [char]$_ }) -join ''
+	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'z' | `
+		Foreach-Object { [char]$_ }) -join ''
 	[int]$NumericArg = 0
 	[Microsoft.PowerShell.PSConsoleReadLine]::TryGetArgAsInt($arg,
 		  [ref]$numericArg, 1)
@@ -51,7 +52,8 @@ function VIDecrement( $key , $arg ){
 }
 
 function VIIncrement( $key , $arg ){
-	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'z' |% { [char]$_ }) -join ''
+	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'z' | `
+		Foreach-Object { [char]$_ }) -join ''
 	[int]$NumericArg = 1
 	[Microsoft.PowerShell.PSConsoleReadLine]::TryGetArgAsInt($arg,
 		  [ref]$numericArg, 1)
@@ -80,7 +82,8 @@ function VIChangeInnerBlock(){
 }
 
 function VIDeleteInnerBlock(){
-	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'Z' |% { [char]$_ }) -join ''
+	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'Z' | `
+		Foreach-Object { [char]$_ }) -join ''
 	$Quotes = New-Object system.collections.hashtable
 	$Quotes["'"] = @("'","'")
 	$Quotes['"'] = @('"','"')
@@ -141,7 +144,7 @@ function VIDeleteInnerBlock(){
 				$LocalShell.SendKeys($Line[$EndChar])
 				[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
 			}
-		} 
+		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($StartChar)
 	}
 }
@@ -297,7 +300,7 @@ function VIGlobalPaste (){
 	if(-not ($Before )){
 		[Microsoft.Powershell.PSConsoleReadline]::SetCursorPosition($Cursor + 1)
 	}
-	(Get-ClipBoard).Split("`n") |% {
+	(Get-ClipBoard).Split("`n") | Foreach-Object {
 		[Microsoft.Powershell.PSConsoleReadline]::Insert( `
 				$_.Replace("`t",'  ') )
 	}
