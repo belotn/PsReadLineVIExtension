@@ -91,7 +91,7 @@ function VIDeleteInnerBlock(){
 	$Quotes["W"] = @(' ', ' ')
 	$Quotes['C'] = @($Caps, $Caps)
 	$Quote = ([Console]::ReadKey($true)).KeyChar
-	if( $Quotes.ContainsKey($quote.toString())){
+	if( $Quotes.ContainsKey($quote.ToString())){
 		$Line = $Null
 		$Cursor = $Null
 		[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
@@ -121,7 +121,7 @@ function VIDeleteInnerBlock(){
 		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar )
-		if($Quote.toString() -ceq 'w'){
+		if($Quote.ToString() -ceq 'w'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()
 		}elseif( $Quote.ToString() -ceq 'W'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
@@ -130,7 +130,7 @@ function VIDeleteInnerBlock(){
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
 		}elseif( $Quote.ToString() -eq '(' -or $Quote.ToString() -eq '[' -or `
 				$Quote.ToString() -eq '{' ){
-			$LocalShell.SendKeys("{$($ClosingQuotes.toString())}")
+			$LocalShell.SendKeys("{$($ClosingQuotes.ToString())}")
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
 		} elseif( $Quote.ToString() -eq 'C') {
 			if($EndChar -eq $Line.Length){
@@ -192,16 +192,16 @@ function VIDeleteOuterBlock(){
 		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar + 1)
-		if($Quote.toString() -ceq 'w'){
+		if($Quote.ToString() -ceq 'w'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()
-		}elseif( $Quote.toString() -ceq 'W'){
+		}elseif( $Quote.ToString() -ceq 'W'){
 			if($StartChar -eq 0){
 				$StartChar--
 			}
 			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar + 1 )
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
-		}elseif($Quote.toString() -eq '"' -or $Quote.toString() -eq "'" ){
+		}elseif($Quote.ToString() -eq '"' -or $Quote.ToString() -eq "'" ){
 			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar )
 			$LocalShell.SendKeys($Quote)
@@ -210,9 +210,9 @@ function VIDeleteOuterBlock(){
 				$Quote.ToString() -eq '{' ){
 			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar )
-			$LocalShell.SendKeys("{$($ClosingQuotes.toString())}")
+			$LocalShell.SendKeys("{$($ClosingQuotes.ToString())}")
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
-		} elseif( $Quote.toString() -eq 'C') {
+		} elseif( $Quote.ToString() -eq 'C') {
 			$LocalShell.SendKeys($Line[$EndChar])
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
 
