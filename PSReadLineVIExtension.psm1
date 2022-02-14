@@ -29,7 +29,8 @@ $LocalShell = New-Object -ComObject wscript.shell
 # {{{ Increment/decrement
 
 function VIDecrement( $key , $arg ){
-	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'z' | `
+	$Separator = "$[({})]-._ '```""
+	$Caps = $Separator + ([char]'A'..[char]'z' | `
 		Foreach-Object { [char]$_ }) -join ''
 	$ConditionalStatements = @('elseif','if','else')
 	[int]$NumericArg = 0
@@ -47,25 +48,15 @@ function VIDecrement( $key , $arg ){
 		$EndChar = $Line.Length
 	}elseif($EndChar - $StartChar -le 0){
 		$IsNumeric = $false
-		$i = 0
-		While($i -lt $ConditionalStatements.Length -and `
-				-not ($isConditonialStatement )) {
-			$Statement = $ConditionalStatements[$i]
-			$FromStart = $Line.IndexOf($Statement, $Cursor)
-			$FromEnd = $Line.LastIndexOf($Statement,$Cursor)
-			if( $FromStart -ne -1 -or $FromEnd -ne -1){
-				if($FromStart -ne -1 ){
-					$StartChar = $FromStart
-				}else{
-					$StartChar = $FromEnd
-				}
-				$NextIndex = ($i - $NumericArg) % $ConditionalStatements.Length
-				$NextVal = $ConditionalStatements[$NextIndex]
-				$EndChar = $StartChar + $Statement.Length
-				$IsConditionalStatement = $true
-				break
-			}
-			$i++
+		$EndChar = $Line.indexOfAny($Separator, $Cursor)
+		$StartChar = $Line.LastIndexOfAny($Separator, $Cursor) + 1
+		$CurrentStatement = $Line.Substring($StartChar, $EndChar - $StartChar)
+		if($ConditionalStatements -contains $CurrentStatement){
+			$NextIndex = ([array]::IndexOf(
+						$ConditionalStatements, $CurrentStatement)`
+				- $NumericArg) % $ConditionalStatements.Length
+			$NextVal = $ConditionalStatements[$NextIndex]
+			$IsConditionalStatement = $true
 		}
 	}
 	if( $IsNumeric -eq $false -and $IsConditionalStatement -eq $false){
@@ -81,7 +72,8 @@ function VIDecrement( $key , $arg ){
 }
 
 function VIIncrement( $key , $arg ){
-	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'z' | `
+	$Separator = "$[({})]-._ '```""
+	$Caps = $Separator + ([char]'A'..[char]'z' | `
 		Foreach-Object { [char]$_ }) -join ''
 	$ConditionalStatements = @('elseif','if','else')
 	[int]$NumericArg = 1
@@ -99,25 +91,15 @@ function VIIncrement( $key , $arg ){
 		$EndChar = $Line.Length
 	}elseif($EndChar - $StartChar -le 0){
 		$IsNumeric = $false
-		$i = 0
-		While($i -lt $ConditionalStatements.Length -and `
-				-not ($isConditonialStatement )) {
-			$Statement = $ConditionalStatements[$i]
-			$FromStart = $Line.IndexOf($Statement, $Cursor)
-			$FromEnd = $Line.LastIndexOf($Statement,$Cursor)
-			if( $FromStart -ne -1 -or $FromEnd -ne -1){
-				if($FromStart -ne -1 ){
-					$StartChar = $FromStart
-				}else{
-					$StartChar = $FromEnd
-				}
-				$NextIndex = ($i + $NumericArg) % $ConditionalStatements.Length
-				$NextVal = $ConditionalStatements[$NextIndex]
-				$EndChar = $StartChar + $Statement.Length
-				$IsConditionalStatement = $true
-				break
-			}
-			$i++
+		$EndChar = $Line.indexOfAny($Separator, $Cursor)
+		$StartChar = $Line.LastIndexOfAny($Separator, $Cursor) + 1
+		$CurrentStatement = $Line.Substring($StartChar, $EndChar - $StartChar)
+		if($ConditionalStatements -contains $CurrentStatement){
+			$NextIndex = ([array]::IndexOf(
+						$ConditionalStatements, $CurrentStatement)`
+				+ $NumericArg) % $ConditionalStatements.Length
+			$NextVal = $ConditionalStatements[$NextIndex]
+			$IsConditionalStatement = $true
 		}
 	}
 	if( $IsNumeric -eq $false -and $IsConditionalStatement -eq $false){
@@ -396,6 +378,8 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: Remove new line after paste                                           #
 # FIXED: Increment/Decrement return error when cursor is not on number         #
 # TODO: Increment if/elseif/else                                               #
+# FIXME:Increment take the first cond statement found                          #
+# 	NOTE: Should find work under cursor rather looking for statement           #
 # HEAD: 1.0.1                                                                  #
 ################################################################################
 # {{{CODING FORMAT                                                             #
