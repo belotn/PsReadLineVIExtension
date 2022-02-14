@@ -280,7 +280,7 @@ function VIDeleteOuterBlock(){
 # }}}
 
 # {{{ Surround
-function ViChangeSurround(){
+function VIChangeSurround(){
 	# inspired by tpope vim-surround
 	# https://github.com/tpope/vim-surround
 	$Quotes = @{
@@ -308,7 +308,7 @@ function ViChangeSurround(){
 		1,$ReplaceClosingQuotes )
 }
 
-function ViDeleteSurround(){
+function VIDeleteSurround(){
 	# inspired by tpope vim-surround
 	# https://github.com/tpope/vim-surround
 	$Quotes = @{
@@ -363,7 +363,7 @@ function VIGlobalPaste (){
 
 Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 	'VIChangeInnerBlock', 'VIDeleteInnerBlock', 'VIChangeOuterBlock', `
-	'VIDeleteOuterBlock', 'ViChangeSurround', 'ViDeleteSurround', `
+	'VIDeleteOuterBlock', 'VIChangeSurround', 'VIDeleteSurround', `
 	'VIGlobalYank', 'VIGlobalPaste'
 ################################################################################
 # Author - belot.nicolas@gmail.com                                             #
