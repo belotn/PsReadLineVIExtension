@@ -33,6 +33,7 @@ function VIDecrement( $key , $arg ){
 	$Caps = $Separator + ([char]'A'..[char]'z' | `
 		Foreach-Object { [char]$_ }) -join ''
 	$ConditionalStatements = @('elseif','if','else')
+	$BoolValues = @('true','false')
 	[int]$NumericArg = 0
 	[Microsoft.PowerShell.PSConsoleReadLine]::TryGetArgAsInt($arg,
 		  [ref]$NumericArg, 1)
@@ -43,7 +44,7 @@ function VIDecrement( $key , $arg ){
 	$EndChar = $Line.indexOfAny($Caps, $Cursor)
 	$StartChar = $Line.LastIndexOfAny($Caps, $Cursor) + 1
 	$IsNumeric = $true
-	$IsConditionalStatement = $false
+	$IsStringStatement = $false
 	if($EndChar -lt 0 -and $StartChar -gt 0){
 		$EndChar = $Line.Length
 	}elseif($EndChar - $StartChar -le 0){
@@ -56,10 +57,16 @@ function VIDecrement( $key , $arg ){
 						$ConditionalStatements, $CurrentStatement)`
 				- $NumericArg) % $ConditionalStatements.Length
 			$NextVal = $ConditionalStatements[$NextIndex]
-			$IsConditionalStatement = $true
+			$IsStringStatement = $true
+		}elseif( $BoolValues -contains $CurrentStatement){
+			$NextIndex = ([array]::IndexOf(
+						$BoolValues, $CurrentStatement)`
+				- $NumericArg) % $BoolValues.Length
+			$NextVal = $BoolValues[$NextIndex]
+			$IsStringStatement = $true
 		}
 	}
-	if( $IsNumeric -eq $false -and $IsConditionalStatement -eq $false){
+	if( $IsNumeric -eq $false -and $IsStringStatement -eq $false){
 		return
 	}
 	if($IsNumeric){
@@ -76,6 +83,7 @@ function VIIncrement( $key , $arg ){
 	$Caps = $Separator + ([char]'A'..[char]'z' | `
 		Foreach-Object { [char]$_ }) -join ''
 	$ConditionalStatements = @('elseif','if','else')
+	$BoolValues = @('true','false')
 	[int]$NumericArg = 1
 	[Microsoft.PowerShell.PSConsoleReadLine]::TryGetArgAsInt($arg,
 		  [ref]$NumericArg, 1)
@@ -86,7 +94,7 @@ function VIIncrement( $key , $arg ){
 	$EndChar = $Line.indexOfAny($Caps, $Cursor)
 	$StartChar = $Line.LastIndexOfAny($Caps, $Cursor) + 1
 	$IsNumeric = $true
-	$IsConditionalStatement = $false
+	$IsStringStatement = $false
 	if($EndChar -lt 0 -and $StartChar -gt 0){
 		$EndChar = $Line.Length
 	}elseif($EndChar - $StartChar -le 0){
@@ -99,10 +107,16 @@ function VIIncrement( $key , $arg ){
 						$ConditionalStatements, $CurrentStatement)`
 				+ $NumericArg) % $ConditionalStatements.Length
 			$NextVal = $ConditionalStatements[$NextIndex]
-			$IsConditionalStatement = $true
+			$IsStringStatement = $true
+		}elseif( $BoolValues -contains $CurrentStatement){
+			$NextIndex = ([array]::IndexOf(
+						$BoolValues, $CurrentStatement)`
+				- $NumericArg) % $BoolValues.Length
+			$NextVal = $BoolValues[$NextIndex]
+			$IsStringStatement = $true
 		}
 	}
-	if( $IsNumeric -eq $false -and $IsConditionalStatement -eq $false){
+	if( $IsNumeric -eq $false -and $IsStringStatement -eq $false){
 		return
 	}
 	if($IsNumeric){
@@ -377,9 +391,9 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: Global paste does not insert at correct place                         #
 # FIXED: Remove new line after paste                                           #
 # FIXED: Increment/Decrement return error when cursor is not on number         #
-# TODO: Increment if/elseif/else                                               #
-# FIXME:Increment take the first cond statement found                          #
-# 	NOTE: Should find work under cursor rather looking for statement           #
+# DONE: Increment if/elseif/else                                               #
+# FIXED:Increment take the first cond statement found                          #
+# DONE: Increment true/false                                                   #
 # HEAD: 1.0.1                                                                  #
 ################################################################################
 # {{{CODING FORMAT                                                             #
