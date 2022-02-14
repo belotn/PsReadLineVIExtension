@@ -330,9 +330,9 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: (In|De)Crement do not work at end of line                              #
 # DONE: Use all exception numeric for inc or dec                               #
 # VERSION: 1.0.0                                                               #
-# DONE: ciC problem with end of word                                           #
-# DONE: Global paste does not insert at correct place                          #
-# DONE: Remove new line after paste                                            #
+# FIXED: ciC problem with end of word                                          #
+# FIXED: Global paste does not insert at correct place                         #
+# FIXED: Remove new line after paste                                           #
 # HEAD: 1.0.1                                                                  #
 ################################################################################
 # {{{CODING FORMAT                                                             #
