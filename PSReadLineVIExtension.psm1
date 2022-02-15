@@ -394,7 +394,8 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Increment if/elseif/else                                               #
 # FIXED:Increment take the first cond statement found                          #
 # DONE: Increment true/false                                                   #
-# HEAD: 1.0.1                                                                  #
+# VERSION: 1.0.1                                                               #
+# TODO: Add user defined increment array                                       #
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
