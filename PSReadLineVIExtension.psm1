@@ -64,6 +64,26 @@ function VIDecrement( $key , $arg ){
 				- $NumericArg) % $BoolValues.Length
 			$NextVal = $BoolValues[$NextIndex]
 			$IsStringStatement = $true
+		}elseif( Test-Path Variable:VIIncrementArray){
+			if( $VIIncrementArray[0] -is [array] ) {
+				foreach($UserStrings in $VIIncrementArray){
+					if($UserStrings -contains $CurrentStatement ){
+						$NextIndex = ([array]::IndexOf(
+									$UserStrings, $CurrentStatement)`
+							- $NumericArg) % $UserStrings.Length
+						$NextVal = $UserStrings[$NextIndex]
+						$IsStringStatement = $true
+					}
+				}
+			}else{
+				if($VIIncrementArray -contains $CurrentStatement ){
+					$NextIndex = ([array]::IndexOf(
+								$VIIncrementArray, $CurrentStatement)`
+						- $NumericArg) % $VIIncrementArray.Length
+					$NextVal = $VIIncrementArray[$NextIndex]
+					$IsStringStatement = $true
+				}
+			}
 		}
 	}
 	if( $IsNumeric -eq $false -and $IsStringStatement -eq $false){
@@ -114,6 +134,26 @@ function VIIncrement( $key , $arg ){
 				- $NumericArg) % $BoolValues.Length
 			$NextVal = $BoolValues[$NextIndex]
 			$IsStringStatement = $true
+		}elseif( Test-Path Variable:VIIncrementArray){
+			if( $VIIncrementArray[0] -is [array] ) {
+				foreach($UserStrings in $VIIncrementArray){
+					if($UserStrings -contains $CurrentStatement ){
+						$NextIndex = ([array]::IndexOf(
+									$UserStrings, $CurrentStatement)`
+							+ $NumericArg) % $UserStrings.Length
+						$NextVal = $UserStrings[$NextIndex]
+						$IsStringStatement = $true
+					}
+				}
+			}else{
+				if($VIIncrementArray -contains $CurrentStatement ){
+					$NextIndex = ([array]::IndexOf(
+								$VIIncrementArray, $CurrentStatement)`
+						+ $NumericArg) % $VIIncrementArray.Length
+					$NextVal = $VIIncrementArray[$NextIndex]
+					$IsStringStatement = $true
+				}
+			}
 		}
 	}
 	if( $IsNumeric -eq $false -and $IsStringStatement -eq $false){
