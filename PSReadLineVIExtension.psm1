@@ -29,7 +29,7 @@ $LocalShell = New-Object -ComObject wscript.shell
 # {{{ Increment/decrement
 
 function VIDecrement( $key , $arg ){
-	$Separator = "$[({})]-._ '```""
+	$Separator = "$[({})]-._ '```":"
 	$Caps = $Separator + ([char]'A'..[char]'z' | `
 		Foreach-Object { [char]$_ }) -join ''
 	$ConditionalStatements = @('elseif','if','else')
@@ -51,6 +51,9 @@ function VIDecrement( $key , $arg ){
 		$IsNumeric = $false
 		$EndChar = $Line.indexOfAny($Separator, $Cursor)
 		$StartChar = $Line.LastIndexOfAny($Separator, $Cursor) + 1
+		if($StartChar -gt 0 -and $EndChar -lt 0){
+			$EndChar = $Line.Length
+		}
 		$CurrentStatement = $Line.Substring($StartChar, $EndChar - $StartChar)
 		if($ConditionalStatements -contains $CurrentStatement){
 			$NextIndex = ([array]::IndexOf(
@@ -99,7 +102,7 @@ function VIDecrement( $key , $arg ){
 }
 
 function VIIncrement( $key , $arg ){
-	$Separator = "$[({})]-._ '```""
+	$Separator = "$[({})]-._ '```":"
 	$Caps = $Separator + ([char]'A'..[char]'z' | `
 		Foreach-Object { [char]$_ }) -join ''
 	$ConditionalStatements = @('elseif','if','else')
@@ -121,6 +124,9 @@ function VIIncrement( $key , $arg ){
 		$IsNumeric = $false
 		$EndChar = $Line.indexOfAny($Separator, $Cursor)
 		$StartChar = $Line.LastIndexOfAny($Separator, $Cursor) + 1
+		if($StartChar -gt 0 -and $EndChar -lt 0){
+			$EndChar = $Line.Length
+		}
 		$CurrentStatement = $Line.Substring($StartChar, $EndChar - $StartChar)
 		if($ConditionalStatements -contains $CurrentStatement){
 			$NextIndex = ([array]::IndexOf(
@@ -435,7 +441,9 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED:Increment take the first cond statement found                          #
 # DONE: Increment true/false                                                   #
 # VERSION: 1.0.1                                                               #
-# TODO: Add user defined increment array                                       #
+# DONE: Add user defined increment array                                       #
+# FIXED: Increment does not support end of line                                #
+# HEAD: 1.0.2                                                                  #
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
