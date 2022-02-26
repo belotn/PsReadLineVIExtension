@@ -445,7 +445,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: Increment does not support end of line                                #
 # VERSION: 1.0.2                                                               #
 # FIXME: Increment crash when line contains only one word                      #
-# HEAD: 1.0.2                                                                  #
+# HEAD: 1.0.3                                                                  #
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
