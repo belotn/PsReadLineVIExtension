@@ -443,6 +443,8 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # VERSION: 1.0.1                                                               #
 # DONE: Add user defined increment array                                       #
 # FIXED: Increment does not support end of line                                #
+# VERSION: 1.0.2                                                               #
+# FIXME: Increment crash when line contains only one word                      #
 # HEAD: 1.0.2                                                                  #
 ################################################################################
 # {{{CODING FORMAT                                                             #
