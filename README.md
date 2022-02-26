@@ -32,7 +32,15 @@ ctrl+a will increment under cursor interger
 
 ctrl+x will increment under cursor interger
 
-Note : Supports digit arguments 10ctrl+a will increment by 10
+Note : 
+- Supports digit arguments 10ctrl+a will increment by 10
+- Supports User Declare Increment (set the variable $VIIncrementArray)
+> Example :
+> `$VIIncrementArray = @(
+ 	@('Monday', 'Tuesday','Wednesday','Thursday', 'Friday', 'Saturday', 'Sunday'),
+	@('January', 'February','March', 'April','May', 'June',
+	'July','August','September', 'October', 'November','December') )`
+
 ## Global Clipboard
 +y will yank current buffer in system clibboard
 
