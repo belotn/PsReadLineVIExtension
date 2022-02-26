@@ -53,6 +53,9 @@ function VIDecrement( $key , $arg ){
 		$StartChar = $Line.LastIndexOfAny($Separator, $Cursor) + 1
 		if($StartChar -gt 0 -and $EndChar -lt 0){
 			$EndChar = $Line.Length
+		}elseif($StartChar -le 0 -and $EndChar -lt 0){
+			$StartChar = 0
+			$EndChar = $Line.Length
 		}
 		$CurrentStatement = $Line.Substring($StartChar, $EndChar - $StartChar)
 		if($ConditionalStatements -contains $CurrentStatement){
@@ -125,6 +128,9 @@ function VIIncrement( $key , $arg ){
 		$EndChar = $Line.indexOfAny($Separator, $Cursor)
 		$StartChar = $Line.LastIndexOfAny($Separator, $Cursor) + 1
 		if($StartChar -gt 0 -and $EndChar -lt 0){
+			$EndChar = $Line.Length
+		}elseif($StartChar -le 0 -and $EndChar -lt 0){
+			$StartChar = 0
 			$EndChar = $Line.Length
 		}
 		$CurrentStatement = $Line.Substring($StartChar, $EndChar - $StartChar)
@@ -444,7 +450,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Add user defined increment array                                       #
 # FIXED: Increment does not support end of line                                #
 # VERSION: 1.0.2                                                               #
-# FIXME: Increment crash when line contains only one word                      #
+# FIXED: Increment crash when line contains only one word                      #
 # HEAD: 1.0.3                                                                  #
 ################################################################################
 # {{{CODING FORMAT                                                             #
