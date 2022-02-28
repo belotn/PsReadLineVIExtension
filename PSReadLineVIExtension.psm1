@@ -188,7 +188,7 @@ function VIChangeInnerBlock(){
 }
 
 function VIDeleteInnerBlock(){
-	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'Z' | `
+	$Caps = "$[({})]-._ '```"\/" + ([char]'A'..[char]'Z' | `
 		Foreach-Object { [char]$_ }) -join ''
 	$Quotes = New-Object system.collections.hashtable
 	$Quotes["'"] = @("'","'")
@@ -196,7 +196,7 @@ function VIDeleteInnerBlock(){
 	$Quotes["("] = @('(',')')
 	$Quotes["{"] = @('{','}')
 	$Quotes["["] = @('[',']')
-	$Quotes["w"] = @("$[({})]-._ '```"", "$[({})]-._ '```"")
+	$Quotes["w"] = @("$[({})]-._ '```"\/", "$[({})]-._ '```"\/")
 	$Quotes["W"] = @(' ', ' ')
 	$Quotes['C'] = @($Caps, $Caps)
 	$Quote = ([Console]::ReadKey($true)).KeyChar
@@ -451,7 +451,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: Increment does not support end of line                                #
 # VERSION: 1.0.2                                                               #
 # FIXED: Increment crash when line contains only one word                      #
-# FIXME: ciw doesn't consider path separtor                                    #
+# FIXED: ciw doesn't consider path separtor                                    #
 # HEAD: 1.0.3                                                                  #
 ################################################################################
 # {{{CODING FORMAT                                                             #
