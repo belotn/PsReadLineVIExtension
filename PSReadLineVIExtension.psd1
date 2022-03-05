@@ -12,7 +12,7 @@
 RootModule = 'PSReadLineVIExtension.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.2'
+ModuleVersion = '1.0.3'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -107,10 +107,10 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'First stable release'
+        ReleaseNotes = 'Correction for InnerText in path'
 
         # Prerelease string of this module
-        Prerelease = '-beta'
+        # Prerelease = '-beta'
 
         # Flag to indicate whether the module requires explicit user acceptance for install/update/save
         # RequireLicenseAcceptance = $false

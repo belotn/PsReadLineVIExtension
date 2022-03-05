@@ -53,6 +53,9 @@ function VIDecrement( $key , $arg ){
 		$StartChar = $Line.LastIndexOfAny($Separator, $Cursor) + 1
 		if($StartChar -gt 0 -and $EndChar -lt 0){
 			$EndChar = $Line.Length
+		}elseif($StartChar -le 0 -and $EndChar -lt 0){
+			$StartChar = 0
+			$EndChar = $Line.Length
 		}
 		$CurrentStatement = $Line.Substring($StartChar, $EndChar - $StartChar)
 		if($ConditionalStatements -contains $CurrentStatement){
@@ -126,6 +129,9 @@ function VIIncrement( $key , $arg ){
 		$StartChar = $Line.LastIndexOfAny($Separator, $Cursor) + 1
 		if($StartChar -gt 0 -and $EndChar -lt 0){
 			$EndChar = $Line.Length
+		}elseif($StartChar -le 0 -and $EndChar -lt 0){
+			$StartChar = 0
+			$EndChar = $Line.Length
 		}
 		$CurrentStatement = $Line.Substring($StartChar, $EndChar - $StartChar)
 		if($ConditionalStatements -contains $CurrentStatement){
@@ -182,7 +188,7 @@ function VIChangeInnerBlock(){
 }
 
 function VIDeleteInnerBlock(){
-	$Caps = "$[({})]-._ '```"" + ([char]'A'..[char]'Z' | `
+	$Caps = "$[({})]-._ '```"\/" + ([char]'A'..[char]'Z' | `
 		Foreach-Object { [char]$_ }) -join ''
 	$Quotes = New-Object system.collections.hashtable
 	$Quotes["'"] = @("'","'")
@@ -190,7 +196,7 @@ function VIDeleteInnerBlock(){
 	$Quotes["("] = @('(',')')
 	$Quotes["{"] = @('{','}')
 	$Quotes["["] = @('[',']')
-	$Quotes["w"] = @("$[({})]-._ '```"", "$[({})]-._ '```"")
+	$Quotes["w"] = @("$[({})]-._ '```"\/", "$[({})]-._ '```"\/")
 	$Quotes["W"] = @(' ', ' ')
 	$Quotes['C'] = @($Caps, $Caps)
 	$Quote = ([Console]::ReadKey($true)).KeyChar
@@ -443,7 +449,10 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # VERSION: 1.0.1                                                               #
 # DONE: Add user defined increment array                                       #
 # FIXED: Increment does not support end of line                                #
-# HEAD: 1.0.2                                                                  #
+# VERSION: 1.0.2                                                               #
+# FIXED: Increment crash when line contains only one word                      #
+# FIXED: ciw doesn't consider path separtor                                    #
+# HEAD: 1.0.3                                                                  #
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
