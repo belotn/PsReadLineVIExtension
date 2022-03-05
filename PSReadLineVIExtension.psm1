@@ -21,11 +21,21 @@ Set-PSReadLineKeyHandler -Chord "+,p" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste }
 Set-PSReadLineKeyHandler -Chord "+,P" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste $true }
+if($VIExperimental -eq $true){
+	Set-PSReadLineKeyHandler -Chord "g,U" -viMode Command `
+	-ScriptBlock { VICapitalize }
+}
 #}}}
 $LocalShell = New-Object -ComObject wscript.shell
 ######################################################################
 # Section Function                                                   #
 ######################################################################
+
+# {{{ g function
+function VICapitalize {
+
+}
+# }}}
 # {{{ Increment/decrement
 
 function VIDecrement( $key , $arg ){
@@ -452,7 +462,8 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # VERSION: 1.0.2                                                               #
 # FIXED: Increment crash when line contains only one word                      #
 # FIXED: ciw doesn't consider path separtor                                    #
-# HEAD: 1.0.3                                                                  #
+# VERSION: 1.0.3                                                               #
+# TODO: Implement gU and gu operator                                           #
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
