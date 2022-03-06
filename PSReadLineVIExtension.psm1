@@ -578,6 +578,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: Preserve line end in global paste                                     #
 # DONE: Implement gE and ge operator                                           #
 # NOTE: DigitArgument() do not read previous keysend                           #
+# HEAD: 1.0.4                                                                  #
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
