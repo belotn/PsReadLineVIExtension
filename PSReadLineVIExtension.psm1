@@ -22,18 +22,111 @@ Set-PSReadLineKeyHandler -Chord "+,p" -ViMode Command `
 Set-PSReadLineKeyHandler -Chord "+,P" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste $true }
 if($VIExperimental -eq $true){
+	Write-Host "Using Experimental VISettings"
 	Set-PSReadLineKeyHandler -Chord "g,U" -viMode Command `
 	-ScriptBlock { VICapitalize }
+	Set-PSReadLineKeyHandler -Chord "g,u" -viMode Command `
+	-ScriptBlock { VILowerize }
 }
 #}}}
 $LocalShell = New-Object -ComObject wscript.shell
+$Digits = (0..9)
+$Separator = "$[({})]-._ '```":\/"
 ######################################################################
 # Section Function                                                   #
 ######################################################################
-
+# {{{ Utility Section
+function NumericArgument {
+	param(
+		[int]$FirstKey
+	)
+	$Keys = @()
+	do {
+	 	$NextEntry = ([Console]::ReadKey($true)).KeyChar.ToString()
+		if($Digits -contains $NextEntry ){
+			$Keys += $NextEntry
+			$StillDigit = $true
+		}else{
+			$StillDigit = $false
+		}
+	}while($StillDigit -eq $true)
+	return @($NextEntry, [int](@($FirstKey) + $Keys -join '') )
+}
+# }}}
 # {{{ g function
-function VICapitalize {
 
+function GetReplacement {
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+			[ref]$Cursor)
+	$Movement = ([Console]::ReadKey($true)).KeyChar.ToString()
+	if($Digits -contains $Movement.ToString() ){
+		($Movement, $IntArgument) = NumericArgument($Movement)
+	}
+	if(-not($IntArgument)){
+		$IntArgument = 1
+	}
+	$Replacement = ''
+	if($Movement -ceq 'l'){
+		$Replacement = $Line.Substring($Cursor, $IntArgument)
+	}elseif($Movement -ceq 'h'){
+		$Cursor -= $IntArgument - 1
+		$Replacement = $Line.Substring($Cursor, $IntArgument)
+	}elseif($Movement -ceq 'w' -and $Movement -ceq 'e'){
+		$EndPos = $Line.IndexOfAny($Separator, $Cursor )
+		$Replacement = $Line.SubString($Cursor, $EndPos - $Cursor )
+	}elseif($Movement -ceq 'W' -and $Movement -ceq 'E'){
+		$EndPos = $Line.IndexOf(' ', $Cursor )
+		$Replacement = $Line.SubString($Cursor, $EndPos - $Cursor )
+	}elseif($Movement -ceq 'b'){
+		$StartPos = $Line.LastIndexOfAny($Separator, $Cursor )
+		$Replacement = $Line.SubString($StartPos, $Cursor - $StartPos )
+		$Cursor = $StartPos
+	}elseif($Movement -ceq 'B'){
+		$StartPos = $Line.LastIndexOf(' ', $Cursor )
+		$Replacement = $Line.SubString($StartPos, $Cursor - $StartPos )
+		$Cursor = $StartPos
+	}elseif($Movement -ceq 'i'){
+		$Quotes = New-Object system.collections.hashtable
+		$Quotes["'"] = @("'","'")
+		$Quotes['"'] = @('"','"')
+		$Quotes["("] = @('(',')')
+		$Quotes["{"] = @('{','}')
+		$Quotes["["] = @('[',']')
+		$Command = ([Console]::ReadKey($true)).KeyChar.ToString()
+		if($Command -ceq 'w') {
+			$StartPos = $Line.LastIndexOfAny($Separator, $Cursor )
+			$EndPos = $Line.IndexOfAny($Separator, $Cursor )
+			$Replacement = $Line.SubString($StartPos, $EndPos - $StartPos )
+			$Cursor = $StartPos
+		}elseif($Command -ceq 'W'){
+			$StartPos = $Line.LastIndexOf(' ', $Cursor )
+			$EndPos = $Line.IndexOf(' ', $Cursor )
+			$Replacement = $Line.SubString($StartPos, $EndPos - $StartPos )
+			$Cursor = $StartPos
+		}elseif( $Quotes.ContainsKey($Command)){
+			($StartChar,$EndChar)=$Quotes[$Command]
+			$StartPos = $Line.LastIndexOf($StartChar, $Cursor )
+			$EndPos = $Line.IndexOf($EndChar, $Cursor )
+			$Replacement = $Line.SubString($StartPos, $EndPos - $StartPos )
+			$Cursor = $StartPos
+		}
+	}
+	return @($Cursor, $Replacement)
+}
+
+function VICapitalize {
+	($Cursor, $Replacement ) = GetReplacement
+	[Microsoft.PowerShell.PSConsoleReadLine]::Replace($Cursor,`
+				$Replacement.Length, $Replacement.toUpper() )
+}
+
+function VILowerize {
+	($Cursor, $Replacement ) = GetReplacement
+	$Replacement.toLower()
+	[Microsoft.PowerShell.PSConsoleReadLine]::Replace($Cursor,`
+				$Replacement.Length, $Replacement.ToLower() )
 }
 # }}}
 # {{{ Increment/decrement
@@ -419,6 +512,7 @@ function VIGlobalPaste (){
 	(Get-ClipBoard).Split("`n") | Foreach-Object {
 		[Microsoft.Powershell.PSConsoleReadline]::Insert( `
 				$_.Replace("`t",'  ') )
+		[Microsoft.Powershell.PSConsoleReadline]::AddLine()
 	}
 }
 # }}}
@@ -463,7 +557,9 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: Increment crash when line contains only one word                      #
 # FIXED: ciw doesn't consider path separtor                                    #
 # VERSION: 1.0.3                                                               #
-# TODO: Implement gU and gu operator                                           #
+# DONE: Implement gU and gu operator                                           #
+# FIXED: Preserve line end in global paste                                     #
+# NOTE: DigitArgument() do not read previous keysend                           #
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
