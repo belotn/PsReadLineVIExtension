@@ -27,6 +27,10 @@ if($VIExperimental -eq $true){
 	-ScriptBlock { VICapitalize }
 	Set-PSReadLineKeyHandler -Chord "g,u" -viMode Command `
 	-ScriptBlock { VILowerize }
+	Set-PSReadLineKeyHandler -Chord "g,e" -viMode Command `
+	-ScriptBlock { ViBackwardEndOfWord }
+	Set-PSReadLineKeyHandler -Chord "g,E" -viMode Command `
+	-ScriptBlock { VIBackwardEndOfGlob }
 }
 #}}}
 $LocalShell = New-Object -ComObject wscript.shell
@@ -128,6 +132,19 @@ function VILowerize {
 	[Microsoft.PowerShell.PSConsoleReadLine]::Replace($Cursor,`
 				$Replacement.Length, $Replacement.ToLower() )
 }
+
+function VIBackwardEndOfWord {
+	[Microsoft.PowerShell.PSConsoleReadLine]::ViBackwardWord()
+	[Microsoft.PowerShell.PSConsoleReadLine]::ViBackwardWord()
+	[Microsoft.PowerShell.PSConsoleReadLine]::NextWordEnd()
+}
+
+function VIBackwardEndOfGlob {
+	[Microsoft.PowerShell.PSConsoleReadLine]::ViBackwardGlob()
+	[Microsoft.PowerShell.PSConsoleReadLine]::ViBackwardGlob()
+	[Microsoft.PowerShell.PSConsoleReadLine]::ViEndOfGlob()
+}
+
 # }}}
 # {{{ Increment/decrement
 
@@ -559,6 +576,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # VERSION: 1.0.3                                                               #
 # DONE: Implement gU and gu operator                                           #
 # FIXED: Preserve line end in global paste                                     #
+# DONE: Implement gE and ge operator                                           #
 # NOTE: DigitArgument() do not read previous keysend                           #
 ################################################################################
 # {{{CODING FORMAT                                                             #
