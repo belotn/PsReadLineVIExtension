@@ -35,6 +35,10 @@ if($VIExperimental -eq $true){
 	-ScriptBlock { CSHLoadPreviousFromHistory }
 	Set-PsReadLineKeyHandler -Chord 'Alt+n' -viMode Command `
 	-ScriptBlock { CSHLoadNextFromHistory }
+	Set-PsReadLineKeyHandler -Chord 'Alt+p' -viMode Insert `
+	-ScriptBlock { CSHLoadPreviousFromHistory }
+	Set-PsReadLineKeyHandler -Chord 'Alt+n' -viMode Insert `
+	-ScriptBlock { CSHLoadNextFromHistory }
 }
 #}}}
 $LocalShell = New-Object -ComObject wscript.shell
@@ -381,6 +385,8 @@ function VIDeleteInnerBlock(){
 	$Quotes["B"] = @('{','}')
 	$Quotes["["] = @('[',']')
 	$Quotes["]"] = @('[',']')
+	$Quotes[">"] = @('<','>')
+	$Quotes["<"] = @('<','>')
 	$Quotes["w"] = @("$[({})]-._ '```"\/", "$[({})]-._ '```"\/")
 	$Quotes["W"] = @(' ', ' ')
 	$Quotes['C'] = @($Caps, $Caps)
@@ -425,10 +431,12 @@ function VIDeleteInnerBlock(){
 		}elseif( $Quote.ToString() -eq '(' -or $Quote.ToString() -eq '[' -or `
 				$Quote.ToString() -eq '{' -or $Quote.ToString() -ceq 'B' `
 				-or $Quote.ToString() -ceq 'b' -or $Quote.ToString() -ceq ')' `
-				-or $Quote.ToString() -ceq ']'-or $Quote.ToString() -ceq '}' `
+				-or $Quote.ToString() -ceq ']' -or $Quote.ToString() -ceq '}' `
+				-or $Quote.ToString() -ceq '<' -or $Quote.ToString() -ceq '>' `
 				){
 			$LocalShell.SendKeys("{$($ClosingQuotes.ToString())}")
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
+			out-file -inputobject "CI : {$($ClosingQuotes.ToString())}" -path c:\temp\log.txt
 		} elseif( $Quote.ToString() -eq 'C') {
 			if($EndChar -eq $Line.Length){
 				[Microsoft.PowerShell.PSConsoleReadLine]::DeleteToEnd()
@@ -463,6 +471,9 @@ function VIDeleteOuterBlock(){
 	$Quotes["}"] = @('{','}')
 	$Quotes["B"] = @('{','}')
 	$Quotes["["] = @('[',']')
+	$Quotes["]"] = @('[',']')
+	$Quotes[">"] = @('<','>')
+	$Quotes["<"] = @('<','>')
 	$Quotes["w"] = @("$[({})]-._ '```"\/", "$[({})]-._ '```"\/")
 	$Quotes["W"] = @(' ', ' ')
 	$Quote = ([Console]::ReadKey($true)).KeyChar
@@ -510,6 +521,7 @@ function VIDeleteOuterBlock(){
 		}elseif( $Quote.ToString() -eq '(' -or $Quote.ToString() -eq '[' -or `
 				$Quote.ToString() -eq '{' -or $Quote.ToString() -eq ')' -or `
 				$Quote.ToString() -eq ']' -or $Quote.ToString() -eq '}'-or `
+				$Quote.ToString() -ceq '<' -or $Quote.ToString() -ceq '>' -or `
 				$Quote.ToString() -ceq 'b' -or $Quote.ToString() -ceq 'B'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar )
@@ -657,8 +669,12 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # NOTE: DigitArgument() do not read previous keysend                           #
 # DONE: Add ESC+P ESC+N CSH equivalent (not really vi function)                #
 # VERSION: 1.0.4                                                               #
+# FIXED: add a[ movement                                                       # 
 # TODO: add [ai]B as an equivalent to [ai][{}]                                 #
 # FIXME: B to not work                                                         # 
+# TODO: map gM (go to midlle of line )                                         #
+# TODO: map gf (Edit File under cursor)                                        #
+# DONE: add i< i> a< a>                                                        #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
