@@ -31,11 +31,19 @@ if($VIExperimental -eq $true){
 	-ScriptBlock { ViBackwardEndOfWord }
 	Set-PSReadLineKeyHandler -Chord "g,E" -viMode Command `
 	-ScriptBlock { VIBackwardEndOfGlob }
+	Set-PsReadLineKeyHandler -Chord 'Alt+p' -viMode Command `
+	-ScriptBlock { CSHLoadPreviousFromHistory }
+	Set-PsReadLineKeyHandler -Chord 'Alt+n' -viMode Command `
+	-ScriptBlock { CSHLoadNextFromHistory }
 }
 #}}}
 $LocalShell = New-Object -ComObject wscript.shell
 $Digits = (0..9)
 $Separator = "$[({})]-._ '```":\/"
+$script:HistoryLine = -1
+$HistorySeparator ="`r`n"
+$HistoryFile = "~\AppData\Roaming\Microsoft\Windows\PowerShell\" `
+	+ "PSReadLine\ConsoleHost_history.txt"
 ######################################################################
 # Section Function                                                   #
 ######################################################################
@@ -55,6 +63,53 @@ function NumericArgument {
 		}
 	}while($StillDigit -eq $true)
 	return @($NextEntry, [int](@($FirstKey) + $Keys -join '') )
+}
+# }}}
+# {{{ CSH Extension
+function CSHLoadPreviousFromHistory {
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+				[ref]$Cursor)
+	if($Line.Trim().Length -gt 0){
+		$Line = [Regex]::Escape($Line)
+		$Matches = Get-Content $HistoryFile -Delimiter $HistorySeparator | `
+			Select-String -Pattern "^$Line"
+		if( $Matches.Count -eq 0){
+			return
+		}
+		${script:HistoryLine} = $Matches[-1].LineNumber 
+		$Line = $Matches[-1].Line
+		[Microsoft.PowerShell.PSConsoleReadLine]::DeleteLine()
+	}else{
+		${script:HistoryLine}--
+		$Line = (Get-Content $HistoryFile `
+			-Delimiter $HistorySeparator)[${script:HistoryLine}] 
+	}
+	[Microsoft.PowerShell.PSConsoleReadLine]::Insert($Line)
+}
+
+function CSHLoadNextFromHistory {
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+				[ref]$Cursor)
+	if($Line.Trim().Length -gt 0){
+		$Line = [Regex]::Escape($Line)
+		$Matches = Get-Content $HistoryFile -Delimiter $HistorySeparator | `
+			Select-String -Pattern "^$Line"
+		if( $Matches.Count -eq 0){
+			return
+		}
+		${script:HistoryLine} = $Matches[-1].LineNumber 
+		$Line = $Matches[-1].Line
+		[Microsoft.PowerShell.PSConsoleReadLine]::DeleteLine()
+	}else{
+		$Line = (Get-Content $HistoryFile `
+			-Delimiter $HistorySeparator)[${script:HistoryLine}] 
+	}
+	[Microsoft.PowerShell.PSConsoleReadLine]::Insert($Line)
+
 }
 # }}}
 # {{{ g function
@@ -96,8 +151,13 @@ function GetReplacement {
 		$Quotes["'"] = @("'","'")
 		$Quotes['"'] = @('"','"')
 		$Quotes["("] = @('(',')')
+		$Quotes[")"] = @('(',')')
+		$Quotes["b"] = @('(',')')
 		$Quotes["{"] = @('{','}')
+		$Quotes["}"] = @('{','}')
+		$Quotes["B"] = @('{','}')
 		$Quotes["["] = @('[',']')
+		$Quotes["]"] = @('[',']')
 		$Command = ([Console]::ReadKey($true)).KeyChar.ToString()
 		if($Command -ceq 'w') {
 			$StartPos = $Line.LastIndexOfAny($Separator, $Cursor )
@@ -314,8 +374,13 @@ function VIDeleteInnerBlock(){
 	$Quotes["'"] = @("'","'")
 	$Quotes['"'] = @('"','"')
 	$Quotes["("] = @('(',')')
+	$Quotes[")"] = @('(',')')
+	$Quotes["b"] = @('(',')')
 	$Quotes["{"] = @('{','}')
+	$Quotes["}"] = @('{','}')
+	$Quotes["B"] = @('{','}')
 	$Quotes["["] = @('[',']')
+	$Quotes["]"] = @('[',']')
 	$Quotes["w"] = @("$[({})]-._ '```"\/", "$[({})]-._ '```"\/")
 	$Quotes["W"] = @(' ', ' ')
 	$Quotes['C'] = @($Caps, $Caps)
@@ -358,7 +423,10 @@ function VIDeleteInnerBlock(){
 			$LocalShell.SendKeys($Quote)
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
 		}elseif( $Quote.ToString() -eq '(' -or $Quote.ToString() -eq '[' -or `
-				$Quote.ToString() -eq '{' ){
+				$Quote.ToString() -eq '{' -or $Quote.ToString() -ceq 'B' `
+				-or $Quote.ToString() -ceq 'b' -or $Quote.ToString() -ceq ')' `
+				-or $Quote.ToString() -ceq ']'-or $Quote.ToString() -ceq '}' `
+				){
 			$LocalShell.SendKeys("{$($ClosingQuotes.ToString())}")
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
 		} elseif( $Quote.ToString() -eq 'C') {
@@ -389,7 +457,11 @@ function VIDeleteOuterBlock(){
 	$Quotes["'"] = @("'","'")
 	$Quotes['"'] = @('"','"')
 	$Quotes["("] = @('(',')')
+	$Quotes[")"] = @('(',')')
+	$Quotes["b"] = @('(',')')
 	$Quotes["{"] = @('{','}')
+	$Quotes["}"] = @('{','}')
+	$Quotes["B"] = @('{','}')
 	$Quotes["["] = @('[',']')
 	$Quotes["w"] = @("$[({})]-._ '```"\/", "$[({})]-._ '```"\/")
 	$Quotes["W"] = @(' ', ' ')
@@ -436,10 +508,12 @@ function VIDeleteOuterBlock(){
 			$LocalShell.SendKeys($Quote)
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
 		}elseif( $Quote.ToString() -eq '(' -or $Quote.ToString() -eq '[' -or `
-				$Quote.ToString() -eq '{' ){
+				$Quote.ToString() -eq '{' -or $Quote.ToString() -eq ')' -or `
+				$Quote.ToString() -eq ']' -or $Quote.ToString() -eq '}'-or `
+				$Quote.ToString() -ceq 'b' -or $Quote.ToString() -ceq 'B'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar )
-			$LocalShell.SendKeys("{$($ClosingQuotes.ToString())}")
+			$LocalShell.SendKeys("{" + $ClosingQuotes.ToString() + "}")
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToChar()
 		} elseif( $Quote.ToString() -eq 'C') {
 			$LocalShell.SendKeys($Line[$EndChar])
@@ -487,7 +561,9 @@ function VIDeleteSurround(){
 		"'" = @("'","'");
 		'"'= @('"','"');
 		"(" = @('(',')');
+		"b" = @('(',')');
 		"{" = @('{','}');
+		# "B" = @('{','}');
 		"[" = @('[',']');
 	}
 	$Line = $Null
@@ -577,7 +653,11 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Implement gU and gu operator                                           #
 # FIXED: Preserve line end in global paste                                     #
 # DONE: Implement gE and ge operator                                           #
+# DONE: add [ai]b as an equivalent to [ai][()]                                 # 
+# TODO: add [ai]B as an equivalent to [ai][{}]                                 #
+# FIXME: B to not work                                                         # 
 # NOTE: DigitArgument() do not read previous keysend                           #
+# DONE: Add ESC+P ESC+N CSH equivalent (not really vi function)                #
 # HEAD: 1.0.4                                                                  #
 ################################################################################
 # {{{CODING FORMAT                                                             #
