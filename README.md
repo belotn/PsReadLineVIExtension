@@ -47,3 +47,16 @@ Note :
 +p will paste after cursor current system clipboard
 
 +P will paste before cursor current system clipboard
+
+## Experimental
+Set variable $VIExperimental to $True to activate
+
+gu gU / lowercase ; uppercase :
+	supported motion
+	g[digit]U : next X charater
+	gU[motion] iwW : next word WORD
+
+ge : go end of previous word
+
+gE : go end of previous WORD
+
