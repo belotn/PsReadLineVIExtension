@@ -654,11 +654,12 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: Preserve line end in global paste                                     #
 # DONE: Implement gE and ge operator                                           #
 # DONE: add [ai]b as an equivalent to [ai][()]                                 # 
-# TODO: add [ai]B as an equivalent to [ai][{}]                                 #
-# FIXME: B to not work                                                         # 
 # NOTE: DigitArgument() do not read previous keysend                           #
 # DONE: Add ESC+P ESC+N CSH equivalent (not really vi function)                #
-# HEAD: 1.0.4                                                                  #
+# VERSION: 1.0.4                                                               #
+# TODO: add [ai]B as an equivalent to [ai][{}]                                 #
+# FIXME: B to not work                                                         # 
+# HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
