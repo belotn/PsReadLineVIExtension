@@ -21,19 +21,29 @@ Set-PSReadLineKeyHandler -Chord "+,p" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste }
 Set-PSReadLineKeyHandler -Chord "+,P" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste $true }
+Set-PSReadLineKeyHandler -Chord "g,e" -viMode Command `
+	-ScriptBlock { ViBackwardEndOfWord }
+Set-PSReadLineKeyHandler -Chord "g,E" -viMode Command `
+	-ScriptBlock { VIBackwardEndOfGlob }
+Set-PsReadLineKeyHandler -Chord "g,M" -viMode Command `
+	-ScriptBlock { VIMiddleOfLine }
+Set-PsReadLineKeyHandler -Chord "g,f" -viMode Command `
+	-ScriptBlock {VIOpenFileUnderCursor }
+Set-PsReadLineKeyHandler -Chord "g,m" -viMode Command `
+	-ScriptBlock { VIMiddleOfScreen }
 if($VIExperimental -eq $true){
 	Write-Host "Using Experimental VISettings"
 	Set-PSReadLineKeyHandler -Chord "g,U" -viMode Command `
 	-ScriptBlock { VICapitalize }
 	Set-PSReadLineKeyHandler -Chord "g,u" -viMode Command `
 	-ScriptBlock { VILowerize }
-	Set-PSReadLineKeyHandler -Chord "g,e" -viMode Command `
-	-ScriptBlock { ViBackwardEndOfWord }
-	Set-PSReadLineKeyHandler -Chord "g,E" -viMode Command `
-	-ScriptBlock { VIBackwardEndOfGlob }
 	Set-PsReadLineKeyHandler -Chord 'Alt+p' -viMode Command `
 	-ScriptBlock { CSHLoadPreviousFromHistory }
 	Set-PsReadLineKeyHandler -Chord 'Alt+n' -viMode Command `
+	-ScriptBlock { CSHLoadNextFromHistory }
+	Set-PsReadLineKeyHandler -Chord 'Alt+p' -viMode Insert `
+	-ScriptBlock { CSHLoadPreviousFromHistory }
+	Set-PsReadLineKeyHandler -Chord 'Alt+n' -viMode Insert `
 	-ScriptBlock { CSHLoadNextFromHistory }
 }
 #}}}
@@ -54,7 +64,7 @@ function NumericArgument {
 	)
 	$Keys = @()
 	do {
-	 	$NextEntry = ([Console]::ReadKey($true)).KeyChar.ToString()
+		$NextEntry = ([Console]::ReadKey($true)).KeyChar.ToString()
 		if($Digits -contains $NextEntry ){
 			$Keys += $NextEntry
 			$StillDigit = $true
@@ -109,8 +119,8 @@ function CSHLoadNextFromHistory {
 			-Delimiter $HistorySeparator)[${script:HistoryLine}] 
 	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::Insert($Line)
-
 }
+
 # }}}
 # {{{ g function
 
@@ -162,17 +172,26 @@ function GetReplacement {
 		if($Command -ceq 'w') {
 			$StartPos = $Line.LastIndexOfAny($Separator, $Cursor )
 			$EndPos = $Line.IndexOfAny($Separator, $Cursor )
+			if($StartPos -gt 0 -and $EndPos -lt 0){
+				$EndPos = $Line.Length
+			}
 			$Replacement = $Line.SubString($StartPos, $EndPos - $StartPos )
 			$Cursor = $StartPos
 		}elseif($Command -ceq 'W'){
 			$StartPos = $Line.LastIndexOf(' ', $Cursor )
 			$EndPos = $Line.IndexOf(' ', $Cursor )
+			if($StartPos -gt 0 -and $EndPos -lt 0){
+				$EndPos = $Line.Length
+			}
 			$Replacement = $Line.SubString($StartPos, $EndPos - $StartPos )
 			$Cursor = $StartPos
 		}elseif( $Quotes.ContainsKey($Command)){
 			($StartChar,$EndChar)=$Quotes[$Command]
 			$StartPos = $Line.LastIndexOf($StartChar, $Cursor )
 			$EndPos = $Line.IndexOf($EndChar, $Cursor )
+			if($StartPos -gt 0 -and $EndPos -lt 0){
+				$EndPos = $Line.Length
+			}
 			$Replacement = $Line.SubString($StartPos, $EndPos - $StartPos )
 			$Cursor = $StartPos
 		}
@@ -191,6 +210,42 @@ function VILowerize {
 	$Replacement.toLower()
 	[Microsoft.PowerShell.PSConsoleReadLine]::Replace($Cursor,`
 				$Replacement.Length, $Replacement.ToLower() )
+}
+
+function VIMiddleOfLine {
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+		[ref]$Cursor)
+	$Cursor = $Line.Length / 2
+	[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($Cursor)
+}
+
+function VIMiddleOfScreen {
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+		[ref]$Cursor)
+	$Cursor = $host.UI.RawUI.WindowSize.Width / 2
+	[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($Cursor)
+}
+
+function VIOpenFileUnderCursor {
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+		[ref]$Cursor)
+	$Separator = "' `""
+	$StartChar = $Line.LastIndexOfAny($Separator, $Cursor) + 1
+	$EndChar = $Line.IndexOfAny($Separator, $Cursor) 
+	if($EndChar -eq -1){
+		$EndChar = $Line.Length
+	}
+	Out-File -inputObject "$Line $Cursor $StartChar $EndChar" -path c:\temp\log.Txt
+	$Path = $Line.Substring($StartChar, $EndChar - $StartChar)
+	if( Test-PAth $Path -PAthType Leaf){
+		Start-Process $ENV:EDITOR -ArgumentList $PAth -Wait -NoNewWindow
+	}
 }
 
 function VIBackwardEndOfWord {
@@ -381,6 +436,8 @@ function VIDeleteInnerBlock(){
 	$Quotes["B"] = @('{','}')
 	$Quotes["["] = @('[',']')
 	$Quotes["]"] = @('[',']')
+	$Quotes[">"] = @('<','>')
+	$Quotes["<"] = @('<','>')
 	$Quotes["w"] = @("$[({})]-._ '```"\/", "$[({})]-._ '```"\/")
 	$Quotes["W"] = @(' ', ' ')
 	$Quotes['C'] = @($Caps, $Caps)
@@ -425,10 +482,12 @@ function VIDeleteInnerBlock(){
 		}elseif( $Quote.ToString() -eq '(' -or $Quote.ToString() -eq '[' -or `
 				$Quote.ToString() -eq '{' -or $Quote.ToString() -ceq 'B' `
 				-or $Quote.ToString() -ceq 'b' -or $Quote.ToString() -ceq ')' `
-				-or $Quote.ToString() -ceq ']'-or $Quote.ToString() -ceq '}' `
+				-or $Quote.ToString() -ceq ']' -or $Quote.ToString() -ceq '}' `
+				-or $Quote.ToString() -ceq '<' -or $Quote.ToString() -ceq '>' `
 				){
 			$LocalShell.SendKeys("{$($ClosingQuotes.ToString())}")
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
+			out-file -inputobject "CI : {$($ClosingQuotes.ToString())}" -path c:\temp\log.txt
 		} elseif( $Quote.ToString() -eq 'C') {
 			if($EndChar -eq $Line.Length){
 				[Microsoft.PowerShell.PSConsoleReadLine]::DeleteToEnd()
@@ -463,6 +522,9 @@ function VIDeleteOuterBlock(){
 	$Quotes["}"] = @('{','}')
 	$Quotes["B"] = @('{','}')
 	$Quotes["["] = @('[',']')
+	$Quotes["]"] = @('[',']')
+	$Quotes[">"] = @('<','>')
+	$Quotes["<"] = @('<','>')
 	$Quotes["w"] = @("$[({})]-._ '```"\/", "$[({})]-._ '```"\/")
 	$Quotes["W"] = @(' ', ' ')
 	$Quote = ([Console]::ReadKey($true)).KeyChar
@@ -510,6 +572,7 @@ function VIDeleteOuterBlock(){
 		}elseif( $Quote.ToString() -eq '(' -or $Quote.ToString() -eq '[' -or `
 				$Quote.ToString() -eq '{' -or $Quote.ToString() -eq ')' -or `
 				$Quote.ToString() -eq ']' -or $Quote.ToString() -eq '}'-or `
+				$Quote.ToString() -ceq '<' -or $Quote.ToString() -ceq '>' -or `
 				$Quote.ToString() -ceq 'b' -or $Quote.ToString() -ceq 'B'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar )
@@ -654,11 +717,16 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: Preserve line end in global paste                                     #
 # DONE: Implement gE and ge operator                                           #
 # DONE: add [ai]b as an equivalent to [ai][()]                                 # 
-# TODO: add [ai]B as an equivalent to [ai][{}]                                 #
-# FIXME: B to not work                                                         # 
 # NOTE: DigitArgument() do not read previous keysend                           #
 # DONE: Add ESC+P ESC+N CSH equivalent (not really vi function)                #
-# HEAD: 1.0.4                                                                  #
+# VERSION: 1.0.4                                                               #
+# FIXED: add a[ movement                                                       # 
+# TODO: add [ai]B as an equivalent to [ai][{}]                                 #
+# FIXME: B to not work                                                         # 
+# DONE: map gM (go to midlle of line )                                         #
+# DONE: map gf (Edit File under cursor)                                        #
+# DONE: add i< i> a< a>                                                        #
+# HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
 ################################################################################
