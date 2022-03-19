@@ -21,16 +21,22 @@ Set-PSReadLineKeyHandler -Chord "+,p" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste }
 Set-PSReadLineKeyHandler -Chord "+,P" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste $true }
+Set-PSReadLineKeyHandler -Chord "g,e" -viMode Command `
+	-ScriptBlock { ViBackwardEndOfWord }
+Set-PSReadLineKeyHandler -Chord "g,E" -viMode Command `
+	-ScriptBlock { VIBackwardEndOfGlob }
+Set-PsReadLineKeyHandler -Chord "g,M" -viMode Command `
+	-ScriptBlock { VIMiddleOfLine }
+Set-PsReadLineKeyHandler -Chord "g,f" -viMode Command `
+	-ScriptBlock {VIOpenFileUnderCursor }
+Set-PsReadLineKeyHandler -Chord "g,m" -viMode Command `
+	-ScriptBlock { VIMiddleOfScreen }
 if($VIExperimental -eq $true){
 	Write-Host "Using Experimental VISettings"
 	Set-PSReadLineKeyHandler -Chord "g,U" -viMode Command `
 	-ScriptBlock { VICapitalize }
 	Set-PSReadLineKeyHandler -Chord "g,u" -viMode Command `
 	-ScriptBlock { VILowerize }
-	Set-PSReadLineKeyHandler -Chord "g,e" -viMode Command `
-	-ScriptBlock { ViBackwardEndOfWord }
-	Set-PSReadLineKeyHandler -Chord "g,E" -viMode Command `
-	-ScriptBlock { VIBackwardEndOfGlob }
 	Set-PsReadLineKeyHandler -Chord 'Alt+p' -viMode Command `
 	-ScriptBlock { CSHLoadPreviousFromHistory }
 	Set-PsReadLineKeyHandler -Chord 'Alt+n' -viMode Command `
@@ -58,7 +64,7 @@ function NumericArgument {
 	)
 	$Keys = @()
 	do {
-	 	$NextEntry = ([Console]::ReadKey($true)).KeyChar.ToString()
+		$NextEntry = ([Console]::ReadKey($true)).KeyChar.ToString()
 		if($Digits -contains $NextEntry ){
 			$Keys += $NextEntry
 			$StillDigit = $true
@@ -113,8 +119,8 @@ function CSHLoadNextFromHistory {
 			-Delimiter $HistorySeparator)[${script:HistoryLine}] 
 	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::Insert($Line)
-
 }
+
 # }}}
 # {{{ g function
 
@@ -166,17 +172,26 @@ function GetReplacement {
 		if($Command -ceq 'w') {
 			$StartPos = $Line.LastIndexOfAny($Separator, $Cursor )
 			$EndPos = $Line.IndexOfAny($Separator, $Cursor )
+			if($StartPos -gt 0 -and $EndPos -lt 0){
+				$EndPos = $Line.Length
+			}
 			$Replacement = $Line.SubString($StartPos, $EndPos - $StartPos )
 			$Cursor = $StartPos
 		}elseif($Command -ceq 'W'){
 			$StartPos = $Line.LastIndexOf(' ', $Cursor )
 			$EndPos = $Line.IndexOf(' ', $Cursor )
+			if($StartPos -gt 0 -and $EndPos -lt 0){
+				$EndPos = $Line.Length
+			}
 			$Replacement = $Line.SubString($StartPos, $EndPos - $StartPos )
 			$Cursor = $StartPos
 		}elseif( $Quotes.ContainsKey($Command)){
 			($StartChar,$EndChar)=$Quotes[$Command]
 			$StartPos = $Line.LastIndexOf($StartChar, $Cursor )
 			$EndPos = $Line.IndexOf($EndChar, $Cursor )
+			if($StartPos -gt 0 -and $EndPos -lt 0){
+				$EndPos = $Line.Length
+			}
 			$Replacement = $Line.SubString($StartPos, $EndPos - $StartPos )
 			$Cursor = $StartPos
 		}
@@ -195,6 +210,42 @@ function VILowerize {
 	$Replacement.toLower()
 	[Microsoft.PowerShell.PSConsoleReadLine]::Replace($Cursor,`
 				$Replacement.Length, $Replacement.ToLower() )
+}
+
+function VIMiddleOfLine {
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+		[ref]$Cursor)
+	$Cursor = $Line.Length / 2
+	[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($Cursor)
+}
+
+function VIMiddleOfScreen {
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+		[ref]$Cursor)
+	$Cursor = $host.UI.RawUI.WindowSize.Width / 2
+	[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($Cursor)
+}
+
+function VIOpenFileUnderCursor {
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+		[ref]$Cursor)
+	$Separator = "' `""
+	$StartChar = $Line.LastIndexOfAny($Separator, $Cursor) + 1
+	$EndChar = $Line.IndexOfAny($Separator, $Cursor) 
+	if($EndChar -eq -1){
+		$EndChar = $Line.Length
+	}
+	Out-File -inputObject "$Line $Cursor $StartChar $EndChar" -path c:\temp\log.Txt
+	$Path = $Line.Substring($StartChar, $EndChar - $StartChar)
+	if( Test-PAth $Path -PAthType Leaf){
+		Start-Process $ENV:EDITOR -ArgumentList $PAth -Wait -NoNewWindow
+	}
 }
 
 function VIBackwardEndOfWord {
@@ -672,8 +723,8 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: add a[ movement                                                       # 
 # TODO: add [ai]B as an equivalent to [ai][{}]                                 #
 # FIXME: B to not work                                                         # 
-# TODO: map gM (go to midlle of line )                                         #
-# TODO: map gf (Edit File under cursor)                                        #
+# DONE: map gM (go to midlle of line )                                         #
+# DONE: map gf (Edit File under cursor)                                        #
 # DONE: add i< i> a< a>                                                        #
 # HEAD:                                                                        #
 ################################################################################

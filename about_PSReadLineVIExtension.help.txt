@@ -8,11 +8,27 @@ LONG DESCRIPTION
 	Add some text manipulation binding to PSReadLine
 	ci/di
 		InnerTextManipulation
-		Supported mouvement '"'[({ wWC
+		Supported mouvement '"'[({})] wWbBC
 	ca/da}
 		OuterTextManipulation
-		Supported mouvement '"'[({ wWC
+		Supported mouvement '"'[({})] wWbBC
 	cs/ds
 		Surrouding action 
 	ctrl+a/ctrl+x
 		Increment Decrement number under cursor
+	ge
+		Go to end of previous word
+	gE
+		Go to end og previous WORD
+	gf
+		Open file under cursor
+	gm
+		Go to middle of screen
+	gM
+		Go to middle of line
+
+	Some experimental feature
+	gu/gU
+		CAPTITALIZE or lowerise, support digit next char or vi motion
+	alt+p/alt+n 
+		CSH equivalent to esc+p esc+n
