@@ -248,9 +248,9 @@ function VIOpenFileUnderCursor {
 	if($EndChar -eq -1){
 		$EndChar = $Line.Length
 	}
-	Out-File -inputObject "$Line $Cursor $StartChar $EndChar" -path c:\temp\log.Txt
+	# Out-File -inputObject "$Line $Cursor $StartChar $EndChar" -path c:\temp\log.Txt
 	$Path = $Line.Substring($StartChar, $EndChar - $StartChar)
-	if( Test-PAth $Path -PAthType Leaf){
+	if( Test-Path $Path -PathType Leaf){
 		Start-Process $ENV:EDITOR -ArgumentList $PAth -Wait -NoNewWindow
 	}
 }
