@@ -52,8 +52,7 @@ $Digits = (0..9)
 $Separator = "$[({})]-._ '```":\/"
 $script:HistoryLine = -1
 $HistorySeparator ="`r`n"
-$HistoryFile = "~\AppData\Roaming\Microsoft\Windows\PowerShell\" `
-	+ "PSReadLine\ConsoleHost_history.txt"
+$HistoryFile = (Get-PSReadLineOption).HistorySavePath
 ######################################################################
 # Section Function                                                   #
 ######################################################################
@@ -89,12 +88,16 @@ function CSHLoadPreviousFromHistory {
 			return
 		}
 		${script:HistoryLine} = $Matches[-1].LineNumber 
-		$Line = $Matches[-1].Line
+		if($PSVersionTable.PSVersion.Major -gt 5 ){
+			$Line = $Matches[-1].Line
+		}else{
+			$Line = $Matches[-1].Line.Trim()
+		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::DeleteLine()
 	}else{
 		${script:HistoryLine}--
 		$Line = (Get-Content $HistoryFile `
-			-Delimiter $HistorySeparator)[${script:HistoryLine}] 
+			-Delimiter $HistorySeparator)[${script:HistoryLine}].Trim() 
 	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::Insert($Line)
 }
@@ -112,11 +115,15 @@ function CSHLoadNextFromHistory {
 			return
 		}
 		${script:HistoryLine} = $Matches[-1].LineNumber 
-		$Line = $Matches[-1].Line
+		if($PSVersionTable.PSVersion.Major -gt 5 ){
+			$Line = $Matches[-1].Line
+		}else{
+			$Line = $Matches[-1].Line.Trim()
+		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::DeleteLine()
 	}else{
 		$Line = (Get-Content $HistoryFile `
-			-Delimiter $HistorySeparator)[${script:HistoryLine}] 
+			-Delimiter $HistorySeparator)[${script:HistoryLine}].Trim() 
 	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::Insert($Line)
 }
@@ -727,7 +734,8 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: add [ai]B as an equivalent to [ai][{}]                                 #
 # VERSION: 1.0.5                                                               #
 # FIXME: B to not work                                                         # 
-# FIXME: Use PsReadLine get option                                             #
+# FIXED: Use PsReadLine get option                                             #
+# FIXME: Get-Content do not remove delim in posh5                              #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
