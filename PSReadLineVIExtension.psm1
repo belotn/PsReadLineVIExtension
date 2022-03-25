@@ -721,11 +721,13 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Add ESC+P ESC+N CSH equivalent (not really vi function)                #
 # VERSION: 1.0.4                                                               #
 # FIXED: add a[ movement                                                       # 
-# TODO: add [ai]B as an equivalent to [ai][{}]                                 #
-# FIXME: B to not work                                                         # 
 # DONE: map gM (go to midlle of line )                                         #
 # DONE: map gf (Edit File under cursor)                                        #
 # DONE: add i< i> a< a>                                                        #
+# DONE: add [ai]B as an equivalent to [ai][{}]                                 #
+# VERSION: 1.0.5                                                               #
+# FIXME: B to not work                                                         # 
+# FIXME: Use PsReadLine get option                                             #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
