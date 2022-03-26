@@ -31,6 +31,18 @@ Set-PsReadLineKeyHandler -Chord "g,f" -viMode Command `
 	-ScriptBlock {VIOpenFileUnderCursor }
 Set-PsReadLineKeyHandler -Chord "g,m" -viMode Command `
 	-ScriptBlock { VIMiddleOfScreen }
+Set-PsReadlineKeyHandler -Chord ':,w' -ViMode Command `
+	-ScriptBlock {
+		[Microsoft.PowerShell.PSConsoleReadLine]::ValidateAndAcceptLine()
+	}
+Set-PsReadlineKeyHandler -Chord ':,x' -ViMode Command `
+	-ScriptBlock {
+		[Microsoft.PowerShell.PSConsoleReadLine]::ValidateAndAcceptLine()
+	}
+Set-PsReadlineKeyHandler -Chord ':,q' -ViMode Command `
+	-ScriptBlock {
+		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
+	}
 if($VIExperimental -eq $true){
 	Write-Host "Using Experimental VISettings"
 	Set-PSReadLineKeyHandler -Chord "g,U" -viMode Command `
