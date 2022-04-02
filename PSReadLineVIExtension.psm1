@@ -745,9 +745,10 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: add i< i> a< a>                                                        #
 # DONE: add [ai]B as an equivalent to [ai][{}]                                 #
 # VERSION: 1.0.5                                                               #
-# FIXME: B to not work                                                         # 
 # FIXED: Use PsReadLine get option                                             #
 # FIXED: Get-Content do not remove delim in posh5                              #
+# VERSION: 1.0.6                                                               #
+# FIXME: B to not work                                                         # 
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
