@@ -31,6 +31,18 @@ Set-PsReadLineKeyHandler -Chord "g,f" -viMode Command `
 	-ScriptBlock {VIOpenFileUnderCursor }
 Set-PsReadLineKeyHandler -Chord "g,m" -viMode Command `
 	-ScriptBlock { VIMiddleOfScreen }
+Set-PsReadlineKeyHandler -Chord ':,w' -ViMode Command `
+	-ScriptBlock {
+		[Microsoft.PowerShell.PSConsoleReadLine]::ValidateAndAcceptLine()
+	}
+Set-PsReadlineKeyHandler -Chord ':,x' -ViMode Command `
+	-ScriptBlock {
+		[Microsoft.PowerShell.PSConsoleReadLine]::ValidateAndAcceptLine()
+	}
+Set-PsReadlineKeyHandler -Chord ':,q' -ViMode Command `
+	-ScriptBlock {
+		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
+	}
 if($VIExperimental -eq $true){
 	Write-Host "Using Experimental VISettings"
 	Set-PSReadLineKeyHandler -Chord "g,U" -viMode Command `
@@ -52,8 +64,7 @@ $Digits = (0..9)
 $Separator = "$[({})]-._ '```":\/"
 $script:HistoryLine = -1
 $HistorySeparator ="`r`n"
-$HistoryFile = "~\AppData\Roaming\Microsoft\Windows\PowerShell\" `
-	+ "PSReadLine\ConsoleHost_history.txt"
+$HistoryFile = (Get-PSReadLineOption).HistorySavePath
 ######################################################################
 # Section Function                                                   #
 ######################################################################
@@ -89,12 +100,16 @@ function CSHLoadPreviousFromHistory {
 			return
 		}
 		${script:HistoryLine} = $Matches[-1].LineNumber 
-		$Line = $Matches[-1].Line
+		if($PSVersionTable.PSVersion.Major -gt 5 ){
+			$Line = $Matches[-1].Line
+		}else{
+			$Line = $Matches[-1].Line.Trim()
+		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::DeleteLine()
 	}else{
 		${script:HistoryLine}--
 		$Line = (Get-Content $HistoryFile `
-			-Delimiter $HistorySeparator)[${script:HistoryLine}] 
+			-Delimiter $HistorySeparator)[${script:HistoryLine}].Trim() 
 	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::Insert($Line)
 }
@@ -112,11 +127,15 @@ function CSHLoadNextFromHistory {
 			return
 		}
 		${script:HistoryLine} = $Matches[-1].LineNumber 
-		$Line = $Matches[-1].Line
+		if($PSVersionTable.PSVersion.Major -gt 5 ){
+			$Line = $Matches[-1].Line
+		}else{
+			$Line = $Matches[-1].Line.Trim()
+		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::DeleteLine()
 	}else{
 		$Line = (Get-Content $HistoryFile `
-			-Delimiter $HistorySeparator)[${script:HistoryLine}] 
+			-Delimiter $HistorySeparator)[${script:HistoryLine}].Trim() 
 	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::Insert($Line)
 }
@@ -241,9 +260,9 @@ function VIOpenFileUnderCursor {
 	if($EndChar -eq -1){
 		$EndChar = $Line.Length
 	}
-	Out-File -inputObject "$Line $Cursor $StartChar $EndChar" -path c:\temp\log.Txt
+	# Out-File -inputObject "$Line $Cursor $StartChar $EndChar" -path c:\temp\log.Txt
 	$Path = $Line.Substring($StartChar, $EndChar - $StartChar)
-	if( Test-PAth $Path -PAthType Leaf){
+	if( Test-Path $Path -PathType Leaf){
 		Start-Process $ENV:EDITOR -ArgumentList $PAth -Wait -NoNewWindow
 	}
 }
@@ -721,11 +740,14 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Add ESC+P ESC+N CSH equivalent (not really vi function)                #
 # VERSION: 1.0.4                                                               #
 # FIXED: add a[ movement                                                       # 
-# TODO: add [ai]B as an equivalent to [ai][{}]                                 #
-# FIXME: B to not work                                                         # 
 # DONE: map gM (go to midlle of line )                                         #
 # DONE: map gf (Edit File under cursor)                                        #
 # DONE: add i< i> a< a>                                                        #
+# DONE: add [ai]B as an equivalent to [ai][{}]                                 #
+# VERSION: 1.0.5                                                               #
+# FIXME: B to not work                                                         # 
+# FIXED: Use PsReadLine get option                                             #
+# FIXED: Get-Content do not remove delim in posh5                              #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
