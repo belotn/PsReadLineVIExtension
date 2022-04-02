@@ -747,7 +747,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # VERSION: 1.0.5                                                               #
 # FIXME: B to not work                                                         # 
 # FIXED: Use PsReadLine get option                                             #
-# FIXME: Get-Content do not remove delim in posh5                              #
+# FIXED: Get-Content do not remove delim in posh5                              #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
