@@ -704,7 +704,7 @@ function VIGlobalPaste (){
 		if($Lines.Count -gt 1){
 			$LastLine = $Lines[-1]
 			$FirstLine = $Lines[0]
-			[Microsoft.Powershell.PSConsoleReadline]::Replace(0, $Line.Length , `
+			[Microsoft.Powershell.PSConsoleReadline]::Replace(0, $Line.Length ,`
 					$Line + $FirstLine) 
 			"$Line$FirstLine" | out-file c:\temp\log.txt
 			$Lines[1..($Lines.Length-2)]| Foreach-Object {
