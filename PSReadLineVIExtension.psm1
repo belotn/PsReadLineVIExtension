@@ -20,7 +20,7 @@ Set-PSReadLineKeyHandler -Chord "+,y" -ViMode Command `
 Set-PSReadLineKeyHandler -Chord "+,p" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste }
 Set-PSReadLineKeyHandler -Chord "+,P" -ViMode Command `
-	-ScriptBlock { VIGlobalPaste $true }
+	-ScriptBlock { VIGlobalPasteBefore}
 Set-PSReadLineKeyHandler -Chord "g,e" -viMode Command `
 	-ScriptBlock { ViBackwardEndOfWord }
 Set-PSReadLineKeyHandler -Chord "g,E" -viMode Command `
@@ -99,7 +99,7 @@ function CSHLoadPreviousFromHistory {
 		if( $Matches.Count -eq 0){
 			return
 		}
-		${script:HistoryLine} = $Matches[-1].LineNumber 
+		${script:HistoryLine} = $Matches[-1].LineNumber
 		if($PSVersionTable.PSVersion.Major -gt 5 ){
 			$Line = $Matches[-1].Line
 		}else{
@@ -109,7 +109,7 @@ function CSHLoadPreviousFromHistory {
 	}else{
 		${script:HistoryLine}--
 		$Line = (Get-Content $HistoryFile `
-			-Delimiter $HistorySeparator)[${script:HistoryLine}].Trim() 
+			-Delimiter $HistorySeparator)[${script:HistoryLine}].Trim()
 	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::Insert($Line)
 }
@@ -126,7 +126,7 @@ function CSHLoadNextFromHistory {
 		if( $Matches.Count -eq 0){
 			return
 		}
-		${script:HistoryLine} = $Matches[-1].LineNumber 
+		${script:HistoryLine} = $Matches[-1].LineNumber
 		if($PSVersionTable.PSVersion.Major -gt 5 ){
 			$Line = $Matches[-1].Line
 		}else{
@@ -135,7 +135,7 @@ function CSHLoadNextFromHistory {
 		[Microsoft.PowerShell.PSConsoleReadLine]::DeleteLine()
 	}else{
 		$Line = (Get-Content $HistoryFile `
-			-Delimiter $HistorySeparator)[${script:HistoryLine}].Trim() 
+			-Delimiter $HistorySeparator)[${script:HistoryLine}].Trim()
 	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::Insert($Line)
 }
@@ -673,21 +673,70 @@ function VIGlobalYank (){
 	Set-ClipBoard $Line
 }
 
-function VIGlobalPaste (){
-	param(
-		$Before=$False
-	)
+function VIGlobalPasteBefore{
 	$Line = $Null
 	$Cursor = $Null
 	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $Line,
 			[ref] $Cursor)
-	if(-not ($Before )){
-		[Microsoft.Powershell.PSConsoleReadline]::SetCursorPosition($Cursor + 1)
-	}
-	(Get-ClipBoard).Split("`n") | Foreach-Object {
+	$Lines = (Get-ClipBoard).Split("`n") 
+	if($Lines.Count -gt 1){
+		$LastLine = $Lines[-1]
+		$Lines[0..($Lines.Length-2)]| Foreach-Object {
+			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
+					$_.Replace("`t",'  ') )
+			[Microsoft.Powershell.PSConsoleReadline]::AddLine()
+				}
 		[Microsoft.Powershell.PSConsoleReadline]::Insert( `
-				$_.Replace("`t",'  ') )
-		[Microsoft.Powershell.PSConsoleReadline]::AddLine()
+			$LastLine.Replace("`t",'  ') )
+	}else{
+			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
+					$Lines.Replace("`t",'  ') )
+	}
+}
+
+function VIGlobalPaste (){
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $Line,
+			[ref] $Cursor)
+	$Lines = (Get-ClipBoard).Split("`n") 
+	if($Cursor -ge ($Line.Length-1) ){
+		if($Lines.Count -gt 1){
+			$LastLine = $Lines[-1]
+			$FirstLine = $Lines[0]
+			[Microsoft.Powershell.PSConsoleReadline]::Replace(0, $Line.Length , `
+					$Line + $FirstLine) 
+			"$Line$FirstLine" | out-file c:\temp\log.txt
+			$Lines[1..($Lines.Length-2)]| Foreach-Object {
+			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
+					$_.Replace("`t",'  ') )
+					[Microsoft.Powershell.PSConsoleReadline]::AddLine()
+			}
+			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
+				$LastLine.Replace("`t",'  ') )
+		}else{ 
+			$Length = $Line.Length
+			$Line += $Lines
+			$Line | out-file c:\temp\log.txt
+			[Microsoft.Powershell.PSConsoleReadline]::Replace(0, $Length , `
+					$Line) 
+		}
+	} else {
+		[Microsoft.Powershell.PSConsoleReadline]::SetCursorPosition($Cursor + 1)
+		if($Lines.Count -gt 1){
+			$LastLine = $Lines[-1]
+			$Lines[0..($Lines.Length-2)]| Foreach-Object {
+			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
+					$_.Replace("`t",'  ') )
+					[Microsoft.Powershell.PSConsoleReadline]::AddLine()
+			}
+			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
+				$LastLine.Replace("`t",'  ') )
+		}else{
+			$Length = $Line.Length
+			[Microsoft.Powershell.PSConsoleReadline]::Replace(0, $Length, `
+						$($Line + $Lines) )
+		}
 	}
 }
 # }}}
@@ -749,6 +798,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: Get-Content do not remove delim in posh5                              #
 # VERSION: 1.0.6                                                               #
 # FIXME: B to not work                                                         # 
+# FIXED: Global Paste After does not work when at end of line                  #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
