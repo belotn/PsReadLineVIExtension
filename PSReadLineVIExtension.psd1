@@ -107,7 +107,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'Appends gU and gu action'
+        ReleaseNotes = 'BugFixe on global Paste ; Appends mapping on Call help with ctrl-) in normal mode'
 
         # Prerelease string of this module
         # Prerelease = '-beta'

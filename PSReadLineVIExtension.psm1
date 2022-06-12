@@ -850,6 +850,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: Global Paste After does not work when at end of line                  #
 # DONE: Ctrl+) to open help on cmdlet                                          # 
 # DONE: Ctrl+) Invoke Help (/? , -h or --help on application                   #
+# VERSION: 1.0.7                                                               #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
