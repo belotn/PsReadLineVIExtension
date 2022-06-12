@@ -57,11 +57,16 @@ if($VIExperimental -eq $true){
 	-ScriptBlock { CSHLoadPreviousFromHistory }
 	Set-PsReadLineKeyHandler -Chord 'Alt+n' -viMode Insert `
 	-ScriptBlock { CSHLoadNextFromHistory }
+	Set-PsReadLineKeyHandler -Chord "Ctrl+)" -viMode Command `
+	-ScriptBlock { VIGetHelp }`
+	Set-PsReadLineKeyHandler -Chord "Ctrl+)" -viMode Insert `
+	-ScriptBlock { VIGetHelp }`
 }
 #}}}
 $LocalShell = New-Object -ComObject wscript.shell
 $Digits = (0..9)
 $Separator = "$[({})]-._ '```":\/"
+$CmdLEtSeparator =  "$[({})]._ '```":\/"
 $script:HistoryLine = -1
 $HistorySeparator ="`r`n"
 $HistoryFile = (Get-PSReadLineOption).HistorySavePath
@@ -84,6 +89,32 @@ function NumericArgument {
 		}
 	}while($StillDigit -eq $true)
 	return @($NextEntry, [int](@($FirstKey) + $Keys -join '') )
+}
+# }}}
+# {{{ Vi Help
+function VIGetHelp {
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+				[ref]$Cursor)
+	if( $null -ne $ENV:PAGER){
+		$Pager = $ENV:PAGER
+	}else{
+		$Pager = "more"
+	}
+	$Command = " $Line "
+	$CmdLetCursor = $Cursor + 1
+	$CommandStart = 1 + $Command.LastIndexOfAny($CmdLetSeparator, $CmdLetCursor)
+	$CommandEnd = $Command.IndexOfAny($CmdLetSeparator, $CmdLetCursor)
+	$Command = $Command.Substring($CommandStart, `
+			$CommandEnd - $CommandStart + 1)
+	if( Get-Command $Command.Trim() ){
+		Start-Process "pwsh" -ArgumentList ('-NoProfile','-Command', 'Get-Help'`
+				, '-Full', $Command, '|', $PAGER) -Wait -NoNewWindow	
+	}else {
+		Start-Process "pwsh" -ArgumentList ('-NoProfile','-Command', 'Echo'`
+				, "'$command'", "|",$Pager) -Wait -NoNewWindow
+	}	
 }
 # }}}
 # {{{ CSH Extension
@@ -799,6 +830,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # VERSION: 1.0.6                                                               #
 # FIXME: B to not work                                                         # 
 # FIXED: Global Paste After does not work when at end of line                  #
+# TODO: Ctrl+] to open help on cmdlet                                          # 
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
