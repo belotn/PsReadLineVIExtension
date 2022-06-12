@@ -12,7 +12,7 @@
 RootModule = 'PSReadLineVIExtension.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.6'
+ModuleVersion = '1.0.7'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -107,7 +107,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'Appends gU and gu action'
+        ReleaseNotes = 'BugFixe on global Paste ; Appends mapping on Call help with ctrl-) in normal mode'
 
         # Prerelease string of this module
         # Prerelease = '-beta'

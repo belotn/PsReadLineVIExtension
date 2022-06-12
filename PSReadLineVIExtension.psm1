@@ -20,7 +20,7 @@ Set-PSReadLineKeyHandler -Chord "+,y" -ViMode Command `
 Set-PSReadLineKeyHandler -Chord "+,p" -ViMode Command `
 	-ScriptBlock { VIGlobalPaste }
 Set-PSReadLineKeyHandler -Chord "+,P" -ViMode Command `
-	-ScriptBlock { VIGlobalPaste $true }
+	-ScriptBlock { VIGlobalPasteBefore}
 Set-PSReadLineKeyHandler -Chord "g,e" -viMode Command `
 	-ScriptBlock { ViBackwardEndOfWord }
 Set-PSReadLineKeyHandler -Chord "g,E" -viMode Command `
@@ -57,11 +57,16 @@ if($VIExperimental -eq $true){
 	-ScriptBlock { CSHLoadPreviousFromHistory }
 	Set-PsReadLineKeyHandler -Chord 'Alt+n' -viMode Insert `
 	-ScriptBlock { CSHLoadNextFromHistory }
+	Set-PsReadLineKeyHandler -Chord "Ctrl+)" -viMode Command `
+	-ScriptBlock { VIGetHelp }
+	Set-PsReadLineKeyHandler -Chord "Ctrl+)" -viMode Insert `
+	-ScriptBlock { VIGetHelp }
 }
 #}}}
 $LocalShell = New-Object -ComObject wscript.shell
 $Digits = (0..9)
 $Separator = "$[({})]-._ '```":\/"
+$CmdLEtSeparator =  "$[({})]._ '```":\/"
 $script:HistoryLine = -1
 $HistorySeparator ="`r`n"
 $HistoryFile = (Get-PSReadLineOption).HistorySavePath
@@ -86,20 +91,64 @@ function NumericArgument {
 	return @($NextEntry, [int](@($FirstKey) + $Keys -join '') )
 }
 # }}}
-# {{{ CSH Extension
-function CSHLoadPreviousFromHistory {
+# {{{ Vi Help
+function VIGetHelp {
 	$Line = $Null
 	$Cursor = $Null
 	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
 				[ref]$Cursor)
-	if($Line.Trim().Length -gt 0){
-		$Line = [Regex]::Escape($Line)
-		$Matches = Get-Content $HistoryFile -Delimiter $HistorySeparator | `
-			Select-String -Pattern "^$Line"
-		if( $Matches.Count -eq 0){
+	if( $null -ne $ENV:PAGER){
+		$Pager = $ENV:PAGER
+	}else{
+		$Pager = "more"
+	}
+	$Command = " $Line "
+	$CmdLetCursor = $Cursor + 1
+	$CommandStart = 1 + $Command.LastIndexOfAny($CmdLetSeparator, $CmdLetCursor)
+	$CommandEnd = $Command.IndexOfAny($CmdLetSeparator, $CmdLetCursor)
+	$Command = $Command.Substring($CommandStart, `
+			$CommandEnd - $CommandStart + 1)
+	$CmdType = Get-Command $Command.Trim()
+	if( $null -eq $CmdType  ){
+		start-process "pwsh" -argumentlist ('-noprofile','-command', 'echo'`
+				, "'$command'", "|",$pager) -wait -nonewwindow
+	}elseif( $CmdType.CommandType -eq "cmdlet") {
+		start-process "pwsh" -argumentlist ('-noprofile','-command', 'get-help'`
+				, '-full', $command, '|', $pager) -wait -nonewwindow
+	}elseif($CmdType.CommandType -eq 'Application'){
+		& $Command.TRim() -h 2>&1 | out-null
+		if($LASTEXITCODE -eq 0 ){
+			start-process "pwsh" -argumentlist ('-noprofile','-command', `
+					$command,'-h','2>&1', '|', $pager) -Wait -NoNewWindow
+		}else{
+			& $Command.TRim() --help 2>&1 | out-null
+			if($LASTEXITCODE -eq 0){
+				start-process "pwsh" -argumentlist ('-noprofile', `
+						'-command' ,$command,'--help','2>&1', '|', $pager) `
+				-Wait -NoNewWindow
+			} else {
+				start-process "pwsh" -argumentlist ('-noprofile', `
+						'-command',  $command,'/?','2>&1', '|', $pager)`
+				-Wait -NoNewWindow
+			}
+		}
+	}
+}
+# }}}
+# {{{ csh extension
+function cshloadpreviousfromhistory {
+	$line = $null
+	$cursor = $null
+	[microsoft.powershell.psconsolereadline]::getbufferstate([ref]$line,`
+				[ref]$cursor)
+	if($line.trim().length -gt 0){
+		$line = [regex]::escape($line)
+		$matches = get-content $historyfile -delimiter $historyseparator | `
+			select-string -pattern "^$line"
+		if( $matches.count -eq 0){
 			return
 		}
-		${script:HistoryLine} = $Matches[-1].LineNumber 
+		${script:HistoryLine} = $Matches[-1].LineNumber
 		if($PSVersionTable.PSVersion.Major -gt 5 ){
 			$Line = $Matches[-1].Line
 		}else{
@@ -109,7 +158,7 @@ function CSHLoadPreviousFromHistory {
 	}else{
 		${script:HistoryLine}--
 		$Line = (Get-Content $HistoryFile `
-			-Delimiter $HistorySeparator)[${script:HistoryLine}].Trim() 
+			-Delimiter $HistorySeparator)[${script:HistoryLine}].Trim()
 	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::Insert($Line)
 }
@@ -126,7 +175,7 @@ function CSHLoadNextFromHistory {
 		if( $Matches.Count -eq 0){
 			return
 		}
-		${script:HistoryLine} = $Matches[-1].LineNumber 
+		${script:HistoryLine} = $Matches[-1].LineNumber
 		if($PSVersionTable.PSVersion.Major -gt 5 ){
 			$Line = $Matches[-1].Line
 		}else{
@@ -135,7 +184,7 @@ function CSHLoadNextFromHistory {
 		[Microsoft.PowerShell.PSConsoleReadLine]::DeleteLine()
 	}else{
 		$Line = (Get-Content $HistoryFile `
-			-Delimiter $HistorySeparator)[${script:HistoryLine}].Trim() 
+			-Delimiter $HistorySeparator)[${script:HistoryLine}].Trim()
 	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::Insert($Line)
 }
@@ -673,21 +722,70 @@ function VIGlobalYank (){
 	Set-ClipBoard $Line
 }
 
-function VIGlobalPaste (){
-	param(
-		$Before=$False
-	)
+function VIGlobalPasteBefore{
 	$Line = $Null
 	$Cursor = $Null
 	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $Line,
 			[ref] $Cursor)
-	if(-not ($Before )){
-		[Microsoft.Powershell.PSConsoleReadline]::SetCursorPosition($Cursor + 1)
-	}
-	(Get-ClipBoard).Split("`n") | Foreach-Object {
+	$Lines = (Get-ClipBoard).Split("`n") 
+	if($Lines.Count -gt 1){
+		$LastLine = $Lines[-1]
+		$Lines[0..($Lines.Length-2)]| Foreach-Object {
+			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
+					$_.Replace("`t",'  ') )
+			[Microsoft.Powershell.PSConsoleReadline]::AddLine()
+				}
 		[Microsoft.Powershell.PSConsoleReadline]::Insert( `
-				$_.Replace("`t",'  ') )
-		[Microsoft.Powershell.PSConsoleReadline]::AddLine()
+			$LastLine.Replace("`t",'  ') )
+	}else{
+			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
+					$Lines.Replace("`t",'  ') )
+	}
+}
+
+function VIGlobalPaste (){
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $Line,
+			[ref] $Cursor)
+	$Lines = (Get-ClipBoard).Split("`n") 
+	if($Cursor -ge ($Line.Length-1) ){
+		if($Lines.Count -gt 1){
+			$LastLine = $Lines[-1]
+			$FirstLine = $Lines[0]
+			[Microsoft.Powershell.PSConsoleReadline]::Replace(0, $Line.Length ,`
+					$Line + $FirstLine) 
+			"$Line$FirstLine" | out-file c:\temp\log.txt
+			$Lines[1..($Lines.Length-2)]| Foreach-Object {
+			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
+					$_.Replace("`t",'  ') )
+					[Microsoft.Powershell.PSConsoleReadline]::AddLine()
+			}
+			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
+				$LastLine.Replace("`t",'  ') )
+		}else{ 
+			$Length = $Line.Length
+			$Line += $Lines
+			$Line | out-file c:\temp\log.txt
+			[Microsoft.Powershell.PSConsoleReadline]::Replace(0, $Length , `
+					$Line) 
+		}
+	} else {
+		[Microsoft.Powershell.PSConsoleReadline]::SetCursorPosition($Cursor + 1)
+		if($Lines.Count -gt 1){
+			$LastLine = $Lines[-1]
+			$Lines[0..($Lines.Length-2)]| Foreach-Object {
+			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
+					$_.Replace("`t",'  ') )
+					[Microsoft.Powershell.PSConsoleReadline]::AddLine()
+			}
+			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
+				$LastLine.Replace("`t",'  ') )
+		}else{
+			$Length = $Line.Length
+			[Microsoft.Powershell.PSConsoleReadline]::Replace(0, $Length, `
+						$($Line + $Lines) )
+		}
 	}
 }
 # }}}
@@ -735,19 +833,24 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Implement gU and gu operator                                           #
 # FIXED: Preserve line end in global paste                                     #
 # DONE: Implement gE and ge operator                                           #
-# DONE: add [ai]b as an equivalent to [ai][()]                                 # 
+# DONE: add [ai]b as an equivalent to [ai][()]                                 #
 # NOTE: DigitArgument() do not read previous keysend                           #
 # DONE: Add ESC+P ESC+N CSH equivalent (not really vi function)                #
 # VERSION: 1.0.4                                                               #
-# FIXED: add a[ movement                                                       # 
+# FIXED: add a[ movement                                                       #
 # DONE: map gM (go to midlle of line )                                         #
 # DONE: map gf (Edit File under cursor)                                        #
 # DONE: add i< i> a< a>                                                        #
 # DONE: add [ai]B as an equivalent to [ai][{}]                                 #
 # VERSION: 1.0.5                                                               #
-# FIXME: B to not work                                                         # 
 # FIXED: Use PsReadLine get option                                             #
 # FIXED: Get-Content do not remove delim in posh5                              #
+# VERSION: 1.0.6                                                               #
+# FIXME: B to not work                                                         #
+# FIXED: Global Paste After does not work when at end of line                  #
+# DONE: Ctrl+) to open help on cmdlet                                          # 
+# DONE: Ctrl+) Invoke Help (/? , -h or --help on application                   #
+# VERSION: 1.0.7                                                               #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
