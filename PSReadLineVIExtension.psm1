@@ -108,26 +108,44 @@ function VIGetHelp {
 	$CommandEnd = $Command.IndexOfAny($CmdLetSeparator, $CmdLetCursor)
 	$Command = $Command.Substring($CommandStart, `
 			$CommandEnd - $CommandStart + 1)
-	if( Get-Command $Command.Trim() ){
-		Start-Process "pwsh" -ArgumentList ('-NoProfile','-Command', 'Get-Help'`
-				, '-Full', $Command, '|', $PAGER) -Wait -NoNewWindow	
-	}else {
-		Start-Process "pwsh" -ArgumentList ('-NoProfile','-Command', 'Echo'`
-				, "'$command'", "|",$Pager) -Wait -NoNewWindow
+	$CmdType = Get-Command $Command.Trim() 
+	if( $null -eq $CmdType  ){
+		start-process "pwsh" -argumentlist ('-noprofile','-command', 'echo'`
+				, "'$command'", "|",$pager) -wait -nonewwindow
+	}elseif( $CmdType.CommandType -eq "cmdlet") {
+		start-process "pwsh" -argumentlist ('-noprofile','-command', 'get-help'`
+				, '-full', $command, '|', $pager) -wait -nonewwindow	
+	}elseif($CmdType.CommandType -eq 'Application'){
+		& $Command.TRim() -h 2>&1 | out-null
+		if($LASTEXITCODE -eq 0 ){
+			start-process "pwsh" -argumentlist ('-noprofile','-command', ` 
+					$command,'-h','2>&1', '|', $pager) -wait -nonewwindow	
+		}else{
+			& $Command.TRim() --help 2>&1 | out-null
+			if($LASTEXITCODE -eq 0){
+				start-process "pwsh" -argumentlist ('-noprofile', `
+						'-command' ,$command,'--help','2>&1', '|', $pager) `
+				-wait -nonewwindow	
+			} else {	
+				start-process "pwsh" -argumentlist ('-noprofile', `
+						'-command',  $command,'/?','2>&1', '|', $pager)`
+				-wait -nonewwindow	
+			}
+		}
 	}	
 }
 # }}}
-# {{{ CSH Extension
-function CSHLoadPreviousFromHistory {
-	$Line = $Null
-	$Cursor = $Null
-	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
-				[ref]$Cursor)
-	if($Line.Trim().Length -gt 0){
-		$Line = [Regex]::Escape($Line)
-		$Matches = Get-Content $HistoryFile -Delimiter $HistorySeparator | `
-			Select-String -Pattern "^$Line"
-		if( $Matches.Count -eq 0){
+# {{{ csh extension
+function cshloadpreviousfromhistory {
+	$line = $null
+	$cursor = $null
+	[microsoft.powershell.psconsolereadline]::getbufferstate([ref]$line,`
+				[ref]$cursor)
+	if($line.trim().length -gt 0){
+		$line = [regex]::escape($line)
+		$matches = get-content $historyfile -delimiter $historyseparator | `
+			select-string -pattern "^$line"
+		if( $matches.count -eq 0){
 			return
 		}
 		${script:HistoryLine} = $Matches[-1].LineNumber
@@ -830,7 +848,8 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # VERSION: 1.0.6                                                               #
 # FIXME: B to not work                                                         # 
 # FIXED: Global Paste After does not work when at end of line                  #
-# TODO: Ctrl+] to open help on cmdlet                                          # 
+# DONE: Ctrl+) to open help on cmdlet                                          # 
+# DONE: Ctrl+) Invoke Help (/? , -h or --help on application                          #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
