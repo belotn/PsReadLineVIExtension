@@ -58,9 +58,9 @@ if($VIExperimental -eq $true){
 	Set-PsReadLineKeyHandler -Chord 'Alt+n' -viMode Insert `
 	-ScriptBlock { CSHLoadNextFromHistory }
 	Set-PsReadLineKeyHandler -Chord "Ctrl+)" -viMode Command `
-	-ScriptBlock { VIGetHelp }`
+	-ScriptBlock { VIGetHelp }
 	Set-PsReadLineKeyHandler -Chord "Ctrl+)" -viMode Insert `
-	-ScriptBlock { VIGetHelp }`
+	-ScriptBlock { VIGetHelp }
 }
 #}}}
 $LocalShell = New-Object -ComObject wscript.shell
@@ -108,31 +108,31 @@ function VIGetHelp {
 	$CommandEnd = $Command.IndexOfAny($CmdLetSeparator, $CmdLetCursor)
 	$Command = $Command.Substring($CommandStart, `
 			$CommandEnd - $CommandStart + 1)
-	$CmdType = Get-Command $Command.Trim() 
+	$CmdType = Get-Command $Command.Trim()
 	if( $null -eq $CmdType  ){
 		start-process "pwsh" -argumentlist ('-noprofile','-command', 'echo'`
 				, "'$command'", "|",$pager) -wait -nonewwindow
 	}elseif( $CmdType.CommandType -eq "cmdlet") {
 		start-process "pwsh" -argumentlist ('-noprofile','-command', 'get-help'`
-				, '-full', $command, '|', $pager) -wait -nonewwindow	
+				, '-full', $command, '|', $pager) -wait -nonewwindow
 	}elseif($CmdType.CommandType -eq 'Application'){
 		& $Command.TRim() -h 2>&1 | out-null
 		if($LASTEXITCODE -eq 0 ){
-			start-process "pwsh" -argumentlist ('-noprofile','-command', ` 
-					$command,'-h','2>&1', '|', $pager) -wait -nonewwindow	
+			start-process "pwsh" -argumentlist ('-noprofile','-command', `
+					$command,'-h','2>&1', '|', $pager) -Wait -NoNewWindow
 		}else{
 			& $Command.TRim() --help 2>&1 | out-null
 			if($LASTEXITCODE -eq 0){
 				start-process "pwsh" -argumentlist ('-noprofile', `
 						'-command' ,$command,'--help','2>&1', '|', $pager) `
-				-wait -nonewwindow	
-			} else {	
+				-Wait -NoNewWindow
+			} else {
 				start-process "pwsh" -argumentlist ('-noprofile', `
 						'-command',  $command,'/?','2>&1', '|', $pager)`
-				-wait -nonewwindow	
+				-Wait -NoNewWindow
 			}
 		}
-	}	
+	}
 }
 # }}}
 # {{{ csh extension
@@ -833,11 +833,11 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Implement gU and gu operator                                           #
 # FIXED: Preserve line end in global paste                                     #
 # DONE: Implement gE and ge operator                                           #
-# DONE: add [ai]b as an equivalent to [ai][()]                                 # 
+# DONE: add [ai]b as an equivalent to [ai][()]                                 #
 # NOTE: DigitArgument() do not read previous keysend                           #
 # DONE: Add ESC+P ESC+N CSH equivalent (not really vi function)                #
 # VERSION: 1.0.4                                                               #
-# FIXED: add a[ movement                                                       # 
+# FIXED: add a[ movement                                                       #
 # DONE: map gM (go to midlle of line )                                         #
 # DONE: map gf (Edit File under cursor)                                        #
 # DONE: add i< i> a< a>                                                        #
@@ -846,10 +846,10 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: Use PsReadLine get option                                             #
 # FIXED: Get-Content do not remove delim in posh5                              #
 # VERSION: 1.0.6                                                               #
-# FIXME: B to not work                                                         # 
+# FIXME: B to not work                                                         #
 # FIXED: Global Paste After does not work when at end of line                  #
 # DONE: Ctrl+) to open help on cmdlet                                          # 
-# DONE: Ctrl+) Invoke Help (/? , -h or --help on application                          #
+# DONE: Ctrl+) Invoke Help (/? , -h or --help on application                   #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
