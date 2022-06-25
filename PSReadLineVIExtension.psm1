@@ -582,7 +582,6 @@ function VIDeleteInnerBlock(){
 				){
 			$LocalShell.SendKeys("{$($ClosingQuotes.ToString())}")
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
-			out-file -inputobject "CI : {$($ClosingQuotes.ToString())}" -path c:\temp\log.txt
 		} elseif( $Quote.ToString() -eq 'C') {
 			if($EndChar -eq $Line.Length){
 				[Microsoft.PowerShell.PSConsoleReadLine]::DeleteToEnd()
