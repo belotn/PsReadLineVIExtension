@@ -1,66 +1,93 @@
 # {{{ Handler
 Set-PSReadLineKeyHandler -Chord "c,i" -ViMode Command `
-	-ScriptBlock { VIChangeInnerBlock }
+	-ScriptBlock { VIChangeInnerBlock } `
+	-Description 'Change Inner block'
 Set-PSReadLineKeyHandler -Chord "c,a" -ViMode Command `
-	-ScriptBlock { VIChangeOuterBlock }
+	-ScriptBlock { VIChangeOuterBlock } `
+	-Description 'Change outter block'
 Set-PSReadLineKeyHandler -Chord "d,i" -ViMode Command `
-	-ScriptBlock { VIDeleteInnerBlock }
+	-ScriptBlock { VIDeleteInnerBlock } `
+	-Description 'Delete Inner Word'
 Set-PSReadLineKeyHandler -Chord "d,a" -ViMode Command `
-	-ScriptBlock { VIDeleteOuterBlock }
+	-ScriptBlock { VIDeleteOuterBlock } `
+	-Description 'Delete Outter Word'
 Set-PSReadLineKeyHandler -Chord "c,s" -ViMode Command `
-	-ScriptBlock { VIChangeSurround }
+	-ScriptBlock { VIChangeSurround } `
+	-Description 'Change Surrounding'
 Set-PSReadLineKeyHandler -Chord "d,s" -ViMode Command `
-	-ScriptBlock { VIDeleteSurround }
+	-ScriptBlock { VIDeleteSurround } `
+	-Description 'Delete Surrounding'
 Set-PSReadLineKeyHandler -Chord "Ctrl+a" -ViMode Command `
-	-ScriptBlock { VIIncrement $args[0] $args[1] }
+	-ScriptBlock { VIIncrement $args[0] $args[1] } `
+	-Description 'Increment Argument'
 Set-PSReadLineKeyHandler -Chord "Ctrl+x" -ViMode Command `
-	-ScriptBlock { VIDecrement $args[0] $args[1] }
+	-ScriptBlock { VIDecrement $args[0] $args[1] } `
+	-Description 'Decrement Argument'
 Set-PSReadLineKeyHandler -Chord "+,y" -ViMode Command `
-	-ScriptBlock { VIGlobalYank }
+	-ScriptBlock { VIGlobalYank } `
+	-Description 'Yank CommandLine to system clipboard'
 Set-PSReadLineKeyHandler -Chord "+,p" -ViMode Command `
-	-ScriptBlock { VIGlobalPaste }
+	-ScriptBlock { VIGlobalPaste } `
+	-Description 'Paste system clipboard at cursor'
 Set-PSReadLineKeyHandler -Chord "+,P" -ViMode Command `
-	-ScriptBlock { VIGlobalPasteBefore}
+	-ScriptBlock { VIGlobalPasteBefore} `
+	-Description 'Paste system clipboard before cursor'
 Set-PSReadLineKeyHandler -Chord "g,e" -viMode Command `
-	-ScriptBlock { ViBackwardEndOfWord }
+	-ScriptBlock { ViBackwardEndOfWord } `
+	-Description 'Move to End of previous word'
 Set-PSReadLineKeyHandler -Chord "g,E" -viMode Command `
-	-ScriptBlock { VIBackwardEndOfGlob }
+	-ScriptBlock { VIBackwardEndOfGlob } `
+	-Description 'Move to End of previous glob'
 Set-PsReadLineKeyHandler -Chord "g,M" -viMode Command `
-	-ScriptBlock { VIMiddleOfLine }
+	-ScriptBlock { VIMiddleOfLine } `
+	-Description 'Move to Middle of Line'
 Set-PsReadLineKeyHandler -Chord "g,f" -viMode Command `
-	-ScriptBlock {VIOpenFileUnderCursor }
+	-ScriptBlock {VIOpenFileUnderCursor } `
+	-Description 'Open File under cursor'
 Set-PsReadLineKeyHandler -Chord "g,m" -viMode Command `
-	-ScriptBlock { VIMiddleOfScreen }
+	-ScriptBlock { VIMiddleOfScreen } `
+	-Description 'Move to Middle of Screen'
 Set-PsReadlineKeyHandler -Chord ':,w' -ViMode Command `
 	-ScriptBlock {
 		[Microsoft.PowerShell.PSConsoleReadLine]::ValidateAndAcceptLine()
-	}
+	} `
+	-Description 'Validate and AcceptLine'
 Set-PsReadlineKeyHandler -Chord ':,x' -ViMode Command `
 	-ScriptBlock {
 		[Microsoft.PowerShell.PSConsoleReadLine]::ValidateAndAcceptLine()
-	}
+	} `
+	-Description 'Validate and AcceptLine'
 Set-PsReadlineKeyHandler -Chord ':,q' -ViMode Command `
 	-ScriptBlock {
 		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
-	}
+	} `
+	-Description 'Cancal Line'
 if($VIExperimental -eq $true){
 	Write-Host "Using Experimental VISettings"
 	Set-PSReadLineKeyHandler -Chord "g,U" -viMode Command `
-	-ScriptBlock { VICapitalize }
+	-ScriptBlock { VICapitalize } `
+	-Description 'Capitalize'
 	Set-PSReadLineKeyHandler -Chord "g,u" -viMode Command `
-	-ScriptBlock { VILowerize }
+	-ScriptBlock { VILowerize } `
+	-Description 'Lowerize'
 	Set-PsReadLineKeyHandler -Chord 'Alt+p' -viMode Command `
-	-ScriptBlock { CSHLoadPreviousFromHistory }
+	-ScriptBlock { CSHLoadPreviousFromHistory } `
+	-Description 'Load Previous entry From History '
 	Set-PsReadLineKeyHandler -Chord 'Alt+n' -viMode Command `
-	-ScriptBlock { CSHLoadNextFromHistory }
+	-ScriptBlock { CSHLoadNextFromHistory } `
+	-Description 'Load Next entry From History '
 	Set-PsReadLineKeyHandler -Chord 'Alt+p' -viMode Insert `
-	-ScriptBlock { CSHLoadPreviousFromHistory }
+	-ScriptBlock { CSHLoadPreviousFromHistory } `
+	-Description 'Load Previous entry From History '
 	Set-PsReadLineKeyHandler -Chord 'Alt+n' -viMode Insert `
-	-ScriptBlock { CSHLoadNextFromHistory }
+	-ScriptBlock { CSHLoadNextFromHistory } `
+	-Description 'Load Next entry From History '
 	Set-PsReadLineKeyHandler -Chord "Ctrl+)" -viMode Command `
-	-ScriptBlock { VIGetHelp }
+	-ScriptBlock { VIGetHelp } `
+	-Description 'Open Help for Command under cursor'
 	Set-PsReadLineKeyHandler -Chord "Ctrl+)" -viMode Insert `
-	-ScriptBlock { VIGetHelp }
+	-ScriptBlock { VIGetHelp } `
+	-Description 'Open Help for Command under cursor'`
 }
 #}}}
 $LocalShell = New-Object -ComObject wscript.shell
@@ -305,7 +332,7 @@ function VIOpenFileUnderCursor {
 		[ref]$Cursor)
 	$Separator = "' `""
 	$StartChar = $Line.LastIndexOfAny($Separator, $Cursor) + 1
-	$EndChar = $Line.IndexOfAny($Separator, $Cursor) 
+	$EndChar = $Line.IndexOfAny($Separator, $Cursor)
 	if($EndChar -eq -1){
 		$EndChar = $Line.Length
 	}
@@ -727,7 +754,7 @@ function VIGlobalPasteBefore{
 	$Cursor = $Null
 	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $Line,
 			[ref] $Cursor)
-	$Lines = (Get-ClipBoard).Split("`n") 
+	$Lines = (Get-ClipBoard).Split("`n")
 	if($Lines.Count -gt 1){
 		$LastLine = $Lines[-1]
 		$Lines[0..($Lines.Length-2)]| Foreach-Object {
@@ -748,13 +775,13 @@ function VIGlobalPaste (){
 	$Cursor = $Null
 	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $Line,
 			[ref] $Cursor)
-	$Lines = (Get-ClipBoard).Split("`n") 
+	$Lines = (Get-ClipBoard).Split("`n")
 	if($Cursor -ge ($Line.Length-1) ){
 		if($Lines.Count -gt 1){
 			$LastLine = $Lines[-1]
 			$FirstLine = $Lines[0]
 			[Microsoft.Powershell.PSConsoleReadline]::Replace(0, $Line.Length ,`
-					$Line + $FirstLine) 
+					$Line + $FirstLine)
 			"$Line$FirstLine" | out-file c:\temp\log.txt
 			$Lines[1..($Lines.Length-2)]| Foreach-Object {
 			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
@@ -763,12 +790,12 @@ function VIGlobalPaste (){
 			}
 			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
 				$LastLine.Replace("`t",'  ') )
-		}else{ 
+		}else{
 			$Length = $Line.Length
 			$Line += $Lines
 			$Line | out-file c:\temp\log.txt
 			[Microsoft.Powershell.PSConsoleReadline]::Replace(0, $Length , `
-					$Line) 
+					$Line)
 		}
 	} else {
 		[Microsoft.Powershell.PSConsoleReadline]::SetCursorPosition($Cursor + 1)
@@ -847,9 +874,11 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: Get-Content do not remove delim in posh5                              #
 # VERSION: 1.0.6                                                               #
 # FIXED: Global Paste After does not work when at end of line                  #
-# DONE: Ctrl+) to open help on cmdlet                                          # 
+# DONE: Ctrl+) to open help on cmdlet                                          #
 # DONE: Ctrl+) Invoke Help (/? , -h or --help on application                   #
+# VERSION: 1.0.7                                                               #
 # FIXME: B to not work                                                         #
+# DONE: Add Description to defined chords                                      #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
