@@ -119,22 +119,8 @@ function NumericArgument {
 }
 # }}}
 # {{{ Vi Help
-function VIGetHelp {
-	$Line = $Null
-	$Cursor = $Null
-	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
-				[ref]$Cursor)
-	if( $null -ne $ENV:PAGER){
-		$Pager = $ENV:PAGER
-	}else{
-		$Pager = "more"
-	}
-	$Command = " $Line "
-	$CmdLetCursor = $Cursor + 1
-	$CommandStart = 1 + $Command.LastIndexOfAny($CmdLetSeparator, $CmdLetCursor)
-	$CommandEnd = $Command.IndexOfAny($CmdLetSeparator, $CmdLetCursor)
-	$Command = $Command.Substring($CommandStart, `
-			$CommandEnd - $CommandStart + 1)
+function InvokeHelp {
+	param($Command)
 	$CmdType = Get-Command $Command.Trim()
 	if( $null -eq $CmdType  ){
 		start-process "pwsh" -argumentlist ('-noprofile','-command', 'echo'`
@@ -159,7 +145,28 @@ function VIGetHelp {
 				-Wait -NoNewWindow
 			}
 		}
+	}elseif($CmdType.CommandType -eq 'Alias'){
+		out-file -path c:\temp\logs.txt -inputobject $cmdtype.Definition -append
+		InvokeHelp $CmdType.Definition
 	}
+}
+function VIGetHelp {
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+				[ref]$Cursor)
+	if( $null -ne $ENV:PAGER){
+		$Pager = $ENV:PAGER
+	}else{
+		$Pager = "more"
+	}
+	$Command = " $Line "
+	$CmdLetCursor = $Cursor + 1
+	$CommandStart = 1 + $Command.LastIndexOfAny($CmdLetSeparator, $CmdLetCursor)
+	$CommandEnd = $Command.IndexOfAny($CmdLetSeparator, $CmdLetCursor)
+	$Command = $Command.Substring($CommandStart, `
+			$CommandEnd - $CommandStart + 1)
+	InvokeHelp $Command
 }
 # }}}
 # {{{ csh extension
@@ -878,6 +885,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # VERSION: 1.0.7                                                               #
 # FIXME: B to not work                                                         #
 # DONE: Add Description to defined chords                                      #
+# TODO: Call Help on Alias                                                     #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
