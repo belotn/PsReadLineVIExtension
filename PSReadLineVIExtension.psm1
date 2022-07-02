@@ -125,7 +125,7 @@ function InvokeHelp {
 	if( $null -eq $CmdType  ){
 		start-process "pwsh" -argumentlist ('-noprofile','-command', 'echo'`
 				, "'$command'", "|",$pager) -wait -nonewwindow
-	}elseif( $CmdType.CommandType -eq "cmdlet") {
+	}elseif( $CmdType.CommandType -eq "Cmdlet" -or  $CmdType.CommandType -eq "Function") {
 		start-process "pwsh" -argumentlist ('-noprofile','-command', 'get-help'`
 				, '-full', $command, '|', $pager) -wait -nonewwindow
 	}elseif($CmdType.CommandType -eq 'Application'){
