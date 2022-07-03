@@ -885,7 +885,8 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # VERSION: 1.0.7                                                               #
 # FIXME: B to not work                                                         #
 # DONE: Add Description to defined chords                                      #
-# TODO: Call Help on Alias                                                     #
+# DONE: Call Help on Alias                                                     #
+# DONE: Call Help on Function                                                  #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
