@@ -63,7 +63,9 @@ gf : Open file under cursor if exist
 Set variable $VIExperimental to $True to activate
 
 gu gU / lowercase ; uppercase :
-	supported motion
-	g[digit]U : next X charater
-	gU[motion] iwW : next word WORD
+
+supported motion
+- g[digit]U : next X charater
+- gU[motion] iwW : next word WORD
+
 <C+)> Call Help for CmdLet or Operation using ENV PAGER or more if not defined
