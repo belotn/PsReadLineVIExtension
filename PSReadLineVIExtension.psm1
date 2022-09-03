@@ -47,6 +47,12 @@ Set-PsReadLineKeyHandler -Chord "g,f" -viMode Command `
 Set-PsReadLineKeyHandler -Chord "g,m" -viMode Command `
 	-ScriptBlock { VIMiddleOfScreen } `
 	-Description 'Move to Middle of Screen'
+Set-PsReadLineKeyHandler -Chord "g,P" -viMode Command `
+	-ScriptBlock {VIgPasteBefore } `
+	-Description "Paste Before and put cursor after yanked text"
+Set-PsReadLineKeyHandler -Chord "g,p" -viMode Command `
+	-ScriptBlock {VIgPasteAfter } `
+	-Description "Paste after and put cursor after yanked text"
 Set-PsReadlineKeyHandler -Chord ':,w' -ViMode Command `
 	-ScriptBlock {
 		[Microsoft.PowerShell.PSConsoleReadLine]::ValidateAndAcceptLine()
@@ -61,7 +67,7 @@ Set-PsReadlineKeyHandler -Chord ':,q' -ViMode Command `
 	-ScriptBlock {
 		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
 	} `
-	-Description 'Cancal Line'
+	-Description 'Cancel Line'
 if($VIExperimental -eq $true){
 	Write-Host "Using Experimental VISettings"
 	Set-PSReadLineKeyHandler -Chord "g,U" -viMode Command `
@@ -70,6 +76,12 @@ if($VIExperimental -eq $true){
 	Set-PSReadLineKeyHandler -Chord "g,u" -viMode Command `
 	-ScriptBlock { VILowerize } `
 	-Description 'Lowerize'
+	Set-PSReadLineKeyHandler -Chord "g,alt+2" -viMode Command `
+	-ScriptBlock { VIChangeCase } `
+	-Description 'Change Case'
+	Set-PSReadLineKeyHandler -Chord "g,~" -viMode Command `
+	-ScriptBlock { VIChangeCase } `
+	-Description 'Change Case'
 	Set-PsReadLineKeyHandler -Chord 'Alt+p' -viMode Command `
 	-ScriptBlock { CSHLoadPreviousFromHistory } `
 	-Description 'Load Previous entry From History '
@@ -87,7 +99,9 @@ if($VIExperimental -eq $true){
 	-Description 'Open Help for Command under cursor'
 	Set-PsReadLineKeyHandler -Chord "Ctrl+)" -viMode Insert `
 	-ScriptBlock { VIGetHelp } `
-	-Description 'Open Help for Command under cursor'`
+	-Description 'Open Help for Command under cursor'
+	Set-PSReadlineKeyHandler -Chord "z,=" -ScriptBlock { vIZWordSubstitution } `
+		-ViMode Command -Description "List similar CmdLet"
 }
 #}}}
 $LocalShell = New-Object -ComObject wscript.shell
@@ -116,6 +130,86 @@ function NumericArgument {
 		}
 	}while($StillDigit -eq $true)
 	return @($NextEntry, [int](@($FirstKey) + $Keys -join '') )
+}
+
+function LevenstienDistance {
+
+# get-ld.ps1 (Levenshtein Distance)
+# Levenshtein Distance is the # of edits it takes to get from 1 string to another
+# This is one way of measuring the "similarity" of 2 strings
+# Many useful purposes that can help in determining if 2 strings are similar possibly
+# with different punctuation or misspellings/typos.
+#
+########################################################
+
+# Putting this as first non comment or empty line declares the parameters
+# the script accepts
+###########
+param([string] $first, [string] $second, [switch] $ignoreCase)
+
+# No NULL check needed, why is that?
+# PowerShell parameter handling converts Nulls into empty strings
+# so we will never get a NULL string but we may get empty strings(length = 0)
+#########################
+
+$len1 = $first.length
+$len2 = $second.length
+
+# If either string has length of zero, the # of edits/distance between them
+# is simply the length of the other string
+#######################################
+if($len1 -eq 0)
+{ return $len2 }
+
+if($len2 -eq 0)
+{ return $len1 }
+
+# make everything lowercase if ignoreCase flag is set
+if($ignoreCase -eq $true)
+{
+  $first = $first.tolowerinvariant()
+  $second = $second.tolowerinvariant()
+}
+
+# create 2d Array to store the "distances"
+$dist = new-object -type 'int[,]' -arg ($len1+1),($len2+1)
+
+# initialize the first row and first column which represent the 2
+# strings we're comparing
+for($i = 0; $i -le $len1; $i++) 
+{  $dist[$i,0] = $i }
+for($j = 0; $j -le $len2; $j++) 
+{  $dist[0,$j] = $j }
+
+$cost = 0
+
+for($i = 1; $i -le $len1;$i++)
+{
+  for($j = 1; $j -le $len2;$j++)
+  {
+    if($second[$j-1] -ceq $first[$i-1])
+    {
+      $cost = 0
+    }
+    else   
+    {
+      $cost = 1
+    }
+    
+    # The value going into the cell is the min of 3 possibilities:
+    # 1. The cell immediately above plus 1
+    # 2. The cell immediately to the left plus 1
+    # 3. The cell diagonally above and to the left plus the 'cost'
+    ##############
+    # I had to add lots of parentheses to "help" the Powershell parser
+    # And I separated out the tempmin variable for readability
+    $tempmin = [System.Math]::Min(([int]$dist[($i-1),$j]+1) , ([int]$dist[$i,($j-1)]+1))
+    $dist[$i,$j] = [System.Math]::Min($tempmin, ([int]$dist[($i-1),($j-1)] + $cost))
+  }
+}
+
+# the actual distance is stored in the bottom right cell
+return $dist[$len1, $len2];
 }
 # }}}
 # {{{ Vi Help
@@ -225,6 +319,7 @@ function CSHLoadNextFromHistory {
 
 # }}}
 # {{{ g function
+# Case Replacement {{{
 
 function GetReplacement {
 	$Line = $Null
@@ -314,6 +409,23 @@ function VILowerize {
 				$Replacement.Length, $Replacement.ToLower() )
 }
 
+function VIChangeCase {
+	($Cursor, $Replacement) = Get-Replacement
+	$Replacement = @( $Replacement.toCharArray() | Foreach-Object {
+		if( $_ -ge 'a' ){
+			$_.toString().toUpper()
+		}else {
+			$_.toString().toLower()
+
+		}
+			}) -join ''
+	[Microsoft.PowerShell.PSConsoleReadLine]::Replace($Cursor,`
+				$Replacement.Length, $Replacement)
+
+}
+
+#}}}
+
 function VIMiddleOfLine {
 	$Line = $Null
 	$Cursor = $Null
@@ -361,6 +473,27 @@ function VIBackwardEndOfGlob {
 	[Microsoft.PowerShell.PSConsoleReadLine]::ViBackwardGlob()
 	[Microsoft.PowerShell.PSConsoleReadLine]::ViEndOfGlob()
 }
+
+function VIgPasteBefore {
+	[Microsoft.PowerShell.PSConsoleReadLine]::PasteBefore()
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+		[ref]$Cursor)
+	[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($Cursor+1)
+}
+
+function VIgPasteAfter {
+	[Microsoft.PowerShell.PSConsoleReadLine]::PasteAfter()
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+		[ref]$Cursor)
+	[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($Cursor+1)
+
+
+}
+
 
 # }}}
 # {{{ Increment/decrement
@@ -822,6 +955,36 @@ function VIGlobalPaste (){
 	}
 }
 # }}}
+# z {{{
+
+function ViZWordSubstitution 	{
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+		[ref]$Cursor)
+	$Tokens = [System.Management.Automation.PsParser]::Tokenize( `
+				$Line, [ref] $null)
+	$Token = $Tokens | Where-Object { $Cursor -gt $_.Start -and `
+		$Cursor -lt ($_.Start + $_.Length)  }
+	$Command = $Token.Content
+	$Length = $Token.Length
+	if( $Token.Type -eq 'Command'){
+		$Commands = (Get-Command | select Name, @{
+			N='LD';
+			E={ LevenstienDistance $Command $_.Name -i
+			}} | sort LD | select -First 20).Name
+	}
+	# Do {
+	# 	$Commands = Get-Command "$Command*"
+	# 	$Length -=1
+	# 	$Command = $Command.SubString(0, $Length)
+	# }While( $Commands.count -eq 0 -or $Length -lt 3)
+	$subst = $Commands | Invoke-Fzf -NoSort -Layout reverse
+	if( $null -ne $subst){
+		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($Token.Start, $Token.Length, $subst)
+	}
+}
+# }}}
 
 Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 	'VIChangeInnerBlock', 'VIDeleteInnerBlock', 'VIChangeOuterBlock', `
@@ -887,6 +1050,10 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Add Description to defined chords                                      #
 # DONE: Call Help on Alias                                                     #
 # DONE: Call Help on Function                                                  #
+# TODO: Add g~                                                                 #
+# DONE: Add gp and gP                                                          #
+# DONE: Try to implement z= on command                                         #
+# TODO: z= should list alias also                                              #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
