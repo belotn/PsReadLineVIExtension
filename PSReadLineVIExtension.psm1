@@ -100,7 +100,7 @@ if($VIExperimental -eq $true){
 	Set-PsReadLineKeyHandler -Chord "Ctrl+)" -viMode Insert `
 	-ScriptBlock { VIGetHelp } `
 	-Description 'Open Help for Command under cursor'
-	Set-PSReadlineKeyHandler -Chord "z,=" -ScriptBlock { vIZWordSubstitution } `
+	Set-PSReadlineKeyHandler -Chord "z,=" -ScriptBlock { VIZWordSubstitution } `
 		-ViMode Command -Description "List similar CmdLet"
 }
 #}}}
@@ -111,6 +111,20 @@ $CmdLEtSeparator =  "$[({})]._ '```":\/"
 $script:HistoryLine = -1
 $HistorySeparator ="`r`n"
 $HistoryFile = (Get-PSReadLineOption).HistorySavePath
+$SBDisplayChoice = {
+	param([array]$List)
+	$Msg = "`n"
+	for($i=0;$i -lt $List.Count ;$i++){
+		$Msg+= "$($i+1) : $($List[$i])`n"
+		# [Console]::Write( "$i : $($List[$i]) `n")
+	}
+	$Choice = Read-Host "$Msg Enter the correction number or press enter"
+	if( $Choice -gt 0 -or $Choice -le $List.Count){
+		return $List[$Choice - 1]
+	}else{
+		return $null
+	}
+}
 ######################################################################
 # Section Function                                                   #
 ######################################################################
@@ -676,6 +690,7 @@ function VIDeleteInnerBlock(){
 	$Quotes["w"] = @("$[({})]-._ '```"\/", "$[({})]-._ '```"\/")
 	$Quotes["W"] = @(' ', ' ')
 	$Quotes['C'] = @($Caps, $Caps)
+	$Quotes['|'] = @('|', '|')
 	$Quote = ([Console]::ReadKey($true)).KeyChar
 	if( $Quotes.ContainsKey($quote.ToString())){
 		$Line = $Null
@@ -711,7 +726,8 @@ function VIDeleteInnerBlock(){
 			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()
 		}elseif( $Quote.ToString() -ceq 'W'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
-		}elseif($Quote.ToString() -eq '"' -or $Quote.ToString() -eq "'" ){
+		}elseif($Quote.ToString() -eq '"' -or $Quote.ToString() -eq "'" -or `
+				$Quote.ToString() -eq '|' ){
 			$LocalShell.SendKeys($Quote)
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
 		}elseif( $Quote.ToString() -eq '(' -or $Quote.ToString() -eq '[' -or `
@@ -761,6 +777,7 @@ function VIDeleteOuterBlock(){
 	$Quotes["<"] = @('<','>')
 	$Quotes["w"] = @("$[({})]-._ '```"\/", "$[({})]-._ '```"\/")
 	$Quotes["W"] = @(' ', ' ')
+	$Quotes['|'] = @('|', '|')
 	$Quote = ([Console]::ReadKey($true)).KeyChar
 	if( $Quotes.ContainsKey($quote.ToString())){
 		$Line = $Null
@@ -798,7 +815,8 @@ function VIDeleteOuterBlock(){
 			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar + 1 )
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
-		}elseif($Quote.ToString() -eq '"' -or $Quote.ToString() -eq "'" ){
+		}elseif($Quote.ToString() -eq '"' -or $Quote.ToString() -eq "'" -or `
+				$Quote.ToString() -eq '|'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar )
 			$LocalShell.SendKeys($Quote)
@@ -957,14 +975,14 @@ function VIGlobalPaste (){
 # }}}
 # z {{{
 
-function ViZWordSubstitution 	{
+function VIZWordSubstitution 	{
 	$Line = $Null
 	$Cursor = $Null
 	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
 		[ref]$Cursor)
 	$Tokens = [System.Management.Automation.PsParser]::Tokenize( `
 				$Line, [ref] $null)
-	$Token = $Tokens | Where-Object { $Cursor -gt $_.Start -and `
+	$Token = $Tokens | Where-Object { $Cursor -ge $_.Start -and `
 		$Cursor -lt ($_.Start + $_.Length)  }
 	$Command = $Token.Content
 	$Length = $Token.Length
@@ -974,15 +992,13 @@ function ViZWordSubstitution 	{
 			E={ LevenstienDistance $Command $_.Name -i
 			}} | sort LD | select -First 20).Name
 	}
-	# Do {
-	# 	$Commands = Get-Command "$Command*"
-	# 	$Length -=1
-	# 	$Command = $Command.SubString(0, $Length)
-	# }While( $Commands.count -eq 0 -or $Length -lt 3)
-	$subst = $Commands | Invoke-Fzf -NoSort -Layout reverse
+	# $subst = $Commands | Invoke-Fzf -NoSort -Layout reverse
+	$subst = invoke-command -ScriptBlock $SBDisplayChoice `
+		-ArgumentList $Commands, $null
 	if( $null -ne $subst){
 		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($Token.Start, $Token.Length, $subst)
 	}
+	[Microsoft.PowerShell.PSConsoleReadLine]::InvokePrompt()
 }
 # }}}
 
@@ -1054,6 +1070,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Add gp and gP                                                          #
 # DONE: Try to implement z= on command                                         #
 # TODO: z= should list alias also                                              #
+# TODO: add | to inner and outer Text                                          #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
