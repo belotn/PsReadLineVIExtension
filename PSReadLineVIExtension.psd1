@@ -107,7 +107,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'BugFixe on global Paste ; Appends mapping on Call help with ctrl-) in normal mode'
+        ReleaseNotes = 'add z= to list cmdlet correction; add | as movement for innertext; Call Help works with Alias and Function; add gp and gP'
 
         # Prerelease string of this module
         # Prerelease = '-beta'
