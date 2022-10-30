@@ -998,6 +998,7 @@ function VIZWordSubstitution 	{
 	if( $null -ne $subst){
 		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($Token.Start, $Token.Length, $subst)
 	}
+	Clear-Host
 	[Microsoft.PowerShell.PSConsoleReadLine]::InvokePrompt()
 }
 # }}}
