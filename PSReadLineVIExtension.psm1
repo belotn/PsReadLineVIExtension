@@ -987,7 +987,7 @@ function VIZWordSubstitution 	{
 	$Command = $Token.Content
 	$Length = $Token.Length
 	if( $Token.Type -eq 'Command'){
-		$Commands = (Get-Command | select Name, @{
+		$Commands = ( ( @(Get-Command)+ @(Get-Alias)) | select Name, @{
 			N='LD';
 			E={ LevenstienDistance $Command $_.Name -i
 			}} | sort LD | select -First 20).Name
@@ -1068,15 +1068,17 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # DONE: Ctrl+) to open help on cmdlet                                          #
 # DONE: Ctrl+) Invoke Help (/? , -h or --help on application                   #
 # VERSION: 1.0.7                                                               #
-# FIXME: B to not work                                                         #
 # DONE: Add Description to defined chords                                      #
 # DONE: Call Help on Alias                                                     #
 # DONE: Call Help on Function                                                  #
-# TODO: Add g~                                                                 #
 # DONE: Add gp and gP                                                          #
 # DONE: Try to implement z= on command                                         #
-# TODO: z= should list alias also                                              #
-# TODO: add | to inner and outer Text                                          #
+# DONE: z= must work without psfzf                                             #
+# DONE: z= should list alias also                                              #
+# DONE: add | to inner and outer Text                                          #
+# VERSION: 1.0.8                                                               #
+# TODO: Add g~ : problem with psreadline keyhandling                           #
+# FIXME: B to not work                                                         #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
