@@ -1,66 +1,107 @@
 # {{{ Handler
 Set-PSReadLineKeyHandler -Chord "c,i" -ViMode Command `
-	-ScriptBlock { VIChangeInnerBlock }
+	-ScriptBlock { VIChangeInnerBlock } `
+	-Description 'Change Inner block'
 Set-PSReadLineKeyHandler -Chord "c,a" -ViMode Command `
-	-ScriptBlock { VIChangeOuterBlock }
+	-ScriptBlock { VIChangeOuterBlock } `
+	-Description 'Change outter block'
 Set-PSReadLineKeyHandler -Chord "d,i" -ViMode Command `
-	-ScriptBlock { VIDeleteInnerBlock }
+	-ScriptBlock { VIDeleteInnerBlock } `
+	-Description 'Delete Inner Word'
 Set-PSReadLineKeyHandler -Chord "d,a" -ViMode Command `
-	-ScriptBlock { VIDeleteOuterBlock }
+	-ScriptBlock { VIDeleteOuterBlock } `
+	-Description 'Delete Outter Word'
 Set-PSReadLineKeyHandler -Chord "c,s" -ViMode Command `
-	-ScriptBlock { VIChangeSurround }
+	-ScriptBlock { VIChangeSurround } `
+	-Description 'Change Surrounding'
 Set-PSReadLineKeyHandler -Chord "d,s" -ViMode Command `
-	-ScriptBlock { VIDeleteSurround }
+	-ScriptBlock { VIDeleteSurround } `
+	-Description 'Delete Surrounding'
 Set-PSReadLineKeyHandler -Chord "Ctrl+a" -ViMode Command `
-	-ScriptBlock { VIIncrement $args[0] $args[1] }
+	-ScriptBlock { VIIncrement $args[0] $args[1] } `
+	-Description 'Increment Argument'
 Set-PSReadLineKeyHandler -Chord "Ctrl+x" -ViMode Command `
-	-ScriptBlock { VIDecrement $args[0] $args[1] }
+	-ScriptBlock { VIDecrement $args[0] $args[1] } `
+	-Description 'Decrement Argument'
 Set-PSReadLineKeyHandler -Chord "+,y" -ViMode Command `
-	-ScriptBlock { VIGlobalYank }
+	-ScriptBlock { VIGlobalYank } `
+	-Description 'Yank CommandLine to system clipboard'
 Set-PSReadLineKeyHandler -Chord "+,p" -ViMode Command `
-	-ScriptBlock { VIGlobalPaste }
+	-ScriptBlock { VIGlobalPaste } `
+	-Description 'Paste system clipboard at cursor'
 Set-PSReadLineKeyHandler -Chord "+,P" -ViMode Command `
-	-ScriptBlock { VIGlobalPasteBefore}
+	-ScriptBlock { VIGlobalPasteBefore} `
+	-Description 'Paste system clipboard before cursor'
 Set-PSReadLineKeyHandler -Chord "g,e" -viMode Command `
-	-ScriptBlock { ViBackwardEndOfWord }
+	-ScriptBlock { ViBackwardEndOfWord } `
+	-Description 'Move to End of previous word'
 Set-PSReadLineKeyHandler -Chord "g,E" -viMode Command `
-	-ScriptBlock { VIBackwardEndOfGlob }
+	-ScriptBlock { VIBackwardEndOfGlob } `
+	-Description 'Move to End of previous glob'
 Set-PsReadLineKeyHandler -Chord "g,M" -viMode Command `
-	-ScriptBlock { VIMiddleOfLine }
+	-ScriptBlock { VIMiddleOfLine } `
+	-Description 'Move to Middle of Line'
 Set-PsReadLineKeyHandler -Chord "g,f" -viMode Command `
-	-ScriptBlock {VIOpenFileUnderCursor }
+	-ScriptBlock {VIOpenFileUnderCursor } `
+	-Description 'Open File under cursor'
 Set-PsReadLineKeyHandler -Chord "g,m" -viMode Command `
-	-ScriptBlock { VIMiddleOfScreen }
+	-ScriptBlock { VIMiddleOfScreen } `
+	-Description 'Move to Middle of Screen'
+Set-PsReadLineKeyHandler -Chord "g,P" -viMode Command `
+	-ScriptBlock {VIgPasteBefore } `
+	-Description "Paste Before and put cursor after yanked text"
+Set-PsReadLineKeyHandler -Chord "g,p" -viMode Command `
+	-ScriptBlock {VIgPasteAfter } `
+	-Description "Paste after and put cursor after yanked text"
 Set-PsReadlineKeyHandler -Chord ':,w' -ViMode Command `
 	-ScriptBlock {
 		[Microsoft.PowerShell.PSConsoleReadLine]::ValidateAndAcceptLine()
-	}
+	} `
+	-Description 'Validate and AcceptLine'
 Set-PsReadlineKeyHandler -Chord ':,x' -ViMode Command `
 	-ScriptBlock {
 		[Microsoft.PowerShell.PSConsoleReadLine]::ValidateAndAcceptLine()
-	}
+	} `
+	-Description 'Validate and AcceptLine'
 Set-PsReadlineKeyHandler -Chord ':,q' -ViMode Command `
 	-ScriptBlock {
 		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
-	}
+	} `
+	-Description 'Cancel Line'
 if($VIExperimental -eq $true){
 	Write-Host "Using Experimental VISettings"
 	Set-PSReadLineKeyHandler -Chord "g,U" -viMode Command `
-	-ScriptBlock { VICapitalize }
+	-ScriptBlock { VICapitalize } `
+	-Description 'Capitalize'
 	Set-PSReadLineKeyHandler -Chord "g,u" -viMode Command `
-	-ScriptBlock { VILowerize }
+	-ScriptBlock { VILowerize } `
+	-Description 'Lowerize'
+	Set-PSReadLineKeyHandler -Chord "g,alt+2" -viMode Command `
+	-ScriptBlock { VIChangeCase } `
+	-Description 'Change Case'
+	Set-PSReadLineKeyHandler -Chord "g,~" -viMode Command `
+	-ScriptBlock { VIChangeCase } `
+	-Description 'Change Case'
 	Set-PsReadLineKeyHandler -Chord 'Alt+p' -viMode Command `
-	-ScriptBlock { CSHLoadPreviousFromHistory }
+	-ScriptBlock { CSHLoadPreviousFromHistory } `
+	-Description 'Load Previous entry From History '
 	Set-PsReadLineKeyHandler -Chord 'Alt+n' -viMode Command `
-	-ScriptBlock { CSHLoadNextFromHistory }
+	-ScriptBlock { CSHLoadNextFromHistory } `
+	-Description 'Load Next entry From History '
 	Set-PsReadLineKeyHandler -Chord 'Alt+p' -viMode Insert `
-	-ScriptBlock { CSHLoadPreviousFromHistory }
+	-ScriptBlock { CSHLoadPreviousFromHistory } `
+	-Description 'Load Previous entry From History '
 	Set-PsReadLineKeyHandler -Chord 'Alt+n' -viMode Insert `
-	-ScriptBlock { CSHLoadNextFromHistory }
+	-ScriptBlock { CSHLoadNextFromHistory } `
+	-Description 'Load Next entry From History '
 	Set-PsReadLineKeyHandler -Chord "Ctrl+)" -viMode Command `
-	-ScriptBlock { VIGetHelp }
+	-ScriptBlock { VIGetHelp } `
+	-Description 'Open Help for Command under cursor'
 	Set-PsReadLineKeyHandler -Chord "Ctrl+)" -viMode Insert `
-	-ScriptBlock { VIGetHelp }
+	-ScriptBlock { VIGetHelp } `
+	-Description 'Open Help for Command under cursor'
+	Set-PSReadlineKeyHandler -Chord "z,=" -ScriptBlock { VIZWordSubstitution } `
+		-ViMode Command -Description "List similar CmdLet"
 }
 #}}}
 $LocalShell = New-Object -ComObject wscript.shell
@@ -70,6 +111,20 @@ $CmdLEtSeparator =  "$[({})]._ '```":\/"
 $script:HistoryLine = -1
 $HistorySeparator ="`r`n"
 $HistoryFile = (Get-PSReadLineOption).HistorySavePath
+$SBDisplayChoice = {
+	param([array]$List)
+	$Msg = "`n"
+	for($i=0;$i -lt $List.Count ;$i++){
+		$Msg+= "$($i+1) : $($List[$i])`n"
+		# [Console]::Write( "$i : $($List[$i]) `n")
+	}
+	$Choice = Read-Host "$Msg Enter the correction number or press enter"
+	if( $Choice -gt 0 -or $Choice -le $List.Count){
+		return $List[$Choice - 1]
+	}else{
+		return $null
+	}
+}
 ######################################################################
 # Section Function                                                   #
 ######################################################################
@@ -90,29 +145,95 @@ function NumericArgument {
 	}while($StillDigit -eq $true)
 	return @($NextEntry, [int](@($FirstKey) + $Keys -join '') )
 }
+
+function LevenstienDistance {
+
+# get-ld.ps1 (Levenshtein Distance)
+# Levenshtein Distance is the # of edits it takes to get from 1 string to another
+# This is one way of measuring the "similarity" of 2 strings
+# Many useful purposes that can help in determining if 2 strings are similar possibly
+# with different punctuation or misspellings/typos.
+#
+########################################################
+
+# Putting this as first non comment or empty line declares the parameters
+# the script accepts
+###########
+param([string] $first, [string] $second, [switch] $ignoreCase)
+
+# No NULL check needed, why is that?
+# PowerShell parameter handling converts Nulls into empty strings
+# so we will never get a NULL string but we may get empty strings(length = 0)
+#########################
+
+$len1 = $first.length
+$len2 = $second.length
+
+# If either string has length of zero, the # of edits/distance between them
+# is simply the length of the other string
+#######################################
+if($len1 -eq 0)
+{ return $len2 }
+
+if($len2 -eq 0)
+{ return $len1 }
+
+# make everything lowercase if ignoreCase flag is set
+if($ignoreCase -eq $true)
+{
+  $first = $first.tolowerinvariant()
+  $second = $second.tolowerinvariant()
+}
+
+# create 2d Array to store the "distances"
+$dist = new-object -type 'int[,]' -arg ($len1+1),($len2+1)
+
+# initialize the first row and first column which represent the 2
+# strings we're comparing
+for($i = 0; $i -le $len1; $i++) 
+{  $dist[$i,0] = $i }
+for($j = 0; $j -le $len2; $j++) 
+{  $dist[0,$j] = $j }
+
+$cost = 0
+
+for($i = 1; $i -le $len1;$i++)
+{
+  for($j = 1; $j -le $len2;$j++)
+  {
+    if($second[$j-1] -ceq $first[$i-1])
+    {
+      $cost = 0
+    }
+    else   
+    {
+      $cost = 1
+    }
+    
+    # The value going into the cell is the min of 3 possibilities:
+    # 1. The cell immediately above plus 1
+    # 2. The cell immediately to the left plus 1
+    # 3. The cell diagonally above and to the left plus the 'cost'
+    ##############
+    # I had to add lots of parentheses to "help" the Powershell parser
+    # And I separated out the tempmin variable for readability
+    $tempmin = [System.Math]::Min(([int]$dist[($i-1),$j]+1) , ([int]$dist[$i,($j-1)]+1))
+    $dist[$i,$j] = [System.Math]::Min($tempmin, ([int]$dist[($i-1),($j-1)] + $cost))
+  }
+}
+
+# the actual distance is stored in the bottom right cell
+return $dist[$len1, $len2];
+}
 # }}}
 # {{{ Vi Help
-function VIGetHelp {
-	$Line = $Null
-	$Cursor = $Null
-	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
-				[ref]$Cursor)
-	if( $null -ne $ENV:PAGER){
-		$Pager = $ENV:PAGER
-	}else{
-		$Pager = "more"
-	}
-	$Command = " $Line "
-	$CmdLetCursor = $Cursor + 1
-	$CommandStart = 1 + $Command.LastIndexOfAny($CmdLetSeparator, $CmdLetCursor)
-	$CommandEnd = $Command.IndexOfAny($CmdLetSeparator, $CmdLetCursor)
-	$Command = $Command.Substring($CommandStart, `
-			$CommandEnd - $CommandStart + 1)
+function InvokeHelp {
+	param($Command)
 	$CmdType = Get-Command $Command.Trim()
 	if( $null -eq $CmdType  ){
 		start-process "pwsh" -argumentlist ('-noprofile','-command', 'echo'`
 				, "'$command'", "|",$pager) -wait -nonewwindow
-	}elseif( $CmdType.CommandType -eq "cmdlet") {
+	}elseif( $CmdType.CommandType -eq "Cmdlet" -or  $CmdType.CommandType -eq "Function") {
 		start-process "pwsh" -argumentlist ('-noprofile','-command', 'get-help'`
 				, '-full', $command, '|', $pager) -wait -nonewwindow
 	}elseif($CmdType.CommandType -eq 'Application'){
@@ -132,7 +253,28 @@ function VIGetHelp {
 				-Wait -NoNewWindow
 			}
 		}
+	}elseif($CmdType.CommandType -eq 'Alias'){
+		out-file -path c:\temp\logs.txt -inputobject $cmdtype.Definition -append
+		InvokeHelp $CmdType.Definition
 	}
+}
+function VIGetHelp {
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+				[ref]$Cursor)
+	if( $null -ne $ENV:PAGER){
+		$Pager = $ENV:PAGER
+	}else{
+		$Pager = "more"
+	}
+	$Command = " $Line "
+	$CmdLetCursor = $Cursor + 1
+	$CommandStart = 1 + $Command.LastIndexOfAny($CmdLetSeparator, $CmdLetCursor)
+	$CommandEnd = $Command.IndexOfAny($CmdLetSeparator, $CmdLetCursor)
+	$Command = $Command.Substring($CommandStart, `
+			$CommandEnd - $CommandStart + 1)
+	InvokeHelp $Command
 }
 # }}}
 # {{{ csh extension
@@ -191,6 +333,7 @@ function CSHLoadNextFromHistory {
 
 # }}}
 # {{{ g function
+# Case Replacement {{{
 
 function GetReplacement {
 	$Line = $Null
@@ -280,6 +423,23 @@ function VILowerize {
 				$Replacement.Length, $Replacement.ToLower() )
 }
 
+function VIChangeCase {
+	($Cursor, $Replacement) = Get-Replacement
+	$Replacement = @( $Replacement.toCharArray() | Foreach-Object {
+		if( $_ -ge 'a' ){
+			$_.toString().toUpper()
+		}else {
+			$_.toString().toLower()
+
+		}
+			}) -join ''
+	[Microsoft.PowerShell.PSConsoleReadLine]::Replace($Cursor,`
+				$Replacement.Length, $Replacement)
+
+}
+
+#}}}
+
 function VIMiddleOfLine {
 	$Line = $Null
 	$Cursor = $Null
@@ -305,7 +465,7 @@ function VIOpenFileUnderCursor {
 		[ref]$Cursor)
 	$Separator = "' `""
 	$StartChar = $Line.LastIndexOfAny($Separator, $Cursor) + 1
-	$EndChar = $Line.IndexOfAny($Separator, $Cursor) 
+	$EndChar = $Line.IndexOfAny($Separator, $Cursor)
 	if($EndChar -eq -1){
 		$EndChar = $Line.Length
 	}
@@ -327,6 +487,27 @@ function VIBackwardEndOfGlob {
 	[Microsoft.PowerShell.PSConsoleReadLine]::ViBackwardGlob()
 	[Microsoft.PowerShell.PSConsoleReadLine]::ViEndOfGlob()
 }
+
+function VIgPasteBefore {
+	[Microsoft.PowerShell.PSConsoleReadLine]::PasteBefore()
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+		[ref]$Cursor)
+	[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($Cursor+1)
+}
+
+function VIgPasteAfter {
+	[Microsoft.PowerShell.PSConsoleReadLine]::PasteAfter()
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+		[ref]$Cursor)
+	[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($Cursor+1)
+
+
+}
+
 
 # }}}
 # {{{ Increment/decrement
@@ -509,6 +690,7 @@ function VIDeleteInnerBlock(){
 	$Quotes["w"] = @("$[({})]-._ '```"\/", "$[({})]-._ '```"\/")
 	$Quotes["W"] = @(' ', ' ')
 	$Quotes['C'] = @($Caps, $Caps)
+	$Quotes['|'] = @('|', '|')
 	$Quote = ([Console]::ReadKey($true)).KeyChar
 	if( $Quotes.ContainsKey($quote.ToString())){
 		$Line = $Null
@@ -544,7 +726,8 @@ function VIDeleteInnerBlock(){
 			[Microsoft.PowerShell.PSConsoleReadLine]::DeleteWord()
 		}elseif( $Quote.ToString() -ceq 'W'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
-		}elseif($Quote.ToString() -eq '"' -or $Quote.ToString() -eq "'" ){
+		}elseif($Quote.ToString() -eq '"' -or $Quote.ToString() -eq "'" -or `
+				$Quote.ToString() -eq '|' ){
 			$LocalShell.SendKeys($Quote)
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
 		}elseif( $Quote.ToString() -eq '(' -or $Quote.ToString() -eq '[' -or `
@@ -555,7 +738,6 @@ function VIDeleteInnerBlock(){
 				){
 			$LocalShell.SendKeys("{$($ClosingQuotes.ToString())}")
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteToBeforeChar()
-			out-file -inputobject "CI : {$($ClosingQuotes.ToString())}" -path c:\temp\log.txt
 		} elseif( $Quote.ToString() -eq 'C') {
 			if($EndChar -eq $Line.Length){
 				[Microsoft.PowerShell.PSConsoleReadLine]::DeleteToEnd()
@@ -595,6 +777,7 @@ function VIDeleteOuterBlock(){
 	$Quotes["<"] = @('<','>')
 	$Quotes["w"] = @("$[({})]-._ '```"\/", "$[({})]-._ '```"\/")
 	$Quotes["W"] = @(' ', ' ')
+	$Quotes['|'] = @('|', '|')
 	$Quote = ([Console]::ReadKey($true)).KeyChar
 	if( $Quotes.ContainsKey($quote.ToString())){
 		$Line = $Null
@@ -632,7 +815,8 @@ function VIDeleteOuterBlock(){
 			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar + 1 )
 			[Microsoft.PowerShell.PSConsoleReadLine]::ViDeleteGlob()
-		}elseif($Quote.ToString() -eq '"' -or $Quote.ToString() -eq "'" ){
+		}elseif($Quote.ToString() -eq '"' -or $Quote.ToString() -eq "'" -or `
+				$Quote.ToString() -eq '|'){
 			[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition(
 					$StartChar )
 			$LocalShell.SendKeys($Quote)
@@ -727,7 +911,7 @@ function VIGlobalPasteBefore{
 	$Cursor = $Null
 	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $Line,
 			[ref] $Cursor)
-	$Lines = (Get-ClipBoard).Split("`n") 
+	$Lines = (Get-ClipBoard).Split("`n")
 	if($Lines.Count -gt 1){
 		$LastLine = $Lines[-1]
 		$Lines[0..($Lines.Length-2)]| Foreach-Object {
@@ -748,13 +932,13 @@ function VIGlobalPaste (){
 	$Cursor = $Null
 	[Microsoft.Powershell.PSConsoleReadline]::GetBufferState([ref] $Line,
 			[ref] $Cursor)
-	$Lines = (Get-ClipBoard).Split("`n") 
+	$Lines = (Get-ClipBoard).Split("`n")
 	if($Cursor -ge ($Line.Length-1) ){
 		if($Lines.Count -gt 1){
 			$LastLine = $Lines[-1]
 			$FirstLine = $Lines[0]
 			[Microsoft.Powershell.PSConsoleReadline]::Replace(0, $Line.Length ,`
-					$Line + $FirstLine) 
+					$Line + $FirstLine)
 			"$Line$FirstLine" | out-file c:\temp\log.txt
 			$Lines[1..($Lines.Length-2)]| Foreach-Object {
 			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
@@ -763,12 +947,12 @@ function VIGlobalPaste (){
 			}
 			[Microsoft.Powershell.PSConsoleReadline]::Insert( `
 				$LastLine.Replace("`t",'  ') )
-		}else{ 
+		}else{
 			$Length = $Line.Length
 			$Line += $Lines
 			$Line | out-file c:\temp\log.txt
 			[Microsoft.Powershell.PSConsoleReadline]::Replace(0, $Length , `
-					$Line) 
+					$Line)
 		}
 	} else {
 		[Microsoft.Powershell.PSConsoleReadline]::SetCursorPosition($Cursor + 1)
@@ -787,6 +971,40 @@ function VIGlobalPaste (){
 						$($Line + $Lines) )
 		}
 	}
+}
+# }}}
+# z {{{
+
+function VIZWordSubstitution 	{
+	$Line = $Null
+	$Cursor = $Null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Line,`
+		[ref]$Cursor)
+	$Tokens = [System.Management.Automation.PsParser]::Tokenize( `
+				$Line, [ref] $null)
+	$Token = $Tokens | Where-Object { $Cursor -ge $_.Start -and `
+		$Cursor -lt ($_.Start + $_.Length)  }
+	$Command = $Token.Content
+	$Length = $Token.Length
+	if( $Token.Type -eq 'Command'){
+		$Commands = ( ( @(Get-Command)+ @(Get-Alias)) | select Name, @{
+			N='LD';
+			E={ LevenstienDistance $Command $_.Name -i
+			}} | sort LD | select -First 20).Name
+	}
+	if(Get-Module PsFZF){
+		$subst = $Commands | Invoke-Fzf -NoSort -Layout reverse
+	}else{
+		$subst = invoke-command -ScriptBlock $SBDisplayChoice `
+			-ArgumentList $Commands, $null
+	}
+	if( $null -ne $subst){
+		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($Token.Start, $Token.Length, $subst)
+	}
+	if(-not (Get-Module psFzf) ) {
+		Clear-Host
+	}
+	[Microsoft.PowerShell.PSConsoleReadLine]::InvokePrompt()
 }
 # }}}
 
@@ -846,11 +1064,21 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # FIXED: Use PsReadLine get option                                             #
 # FIXED: Get-Content do not remove delim in posh5                              #
 # VERSION: 1.0.6                                                               #
-# FIXME: B to not work                                                         #
 # FIXED: Global Paste After does not work when at end of line                  #
-# DONE: Ctrl+) to open help on cmdlet                                          # 
+# DONE: Ctrl+) to open help on cmdlet                                          #
 # DONE: Ctrl+) Invoke Help (/? , -h or --help on application                   #
 # VERSION: 1.0.7                                                               #
+# DONE: Add Description to defined chords                                      #
+# DONE: Call Help on Alias                                                     #
+# DONE: Call Help on Function                                                  #
+# DONE: Add gp and gP                                                          #
+# DONE: Try to implement z= on command                                         #
+# DONE: z= must work without psfzf                                             #
+# DONE: z= should list alias also                                              #
+# DONE: add | to inner and outer Text                                          #
+# VERSION: 1.0.8                                                               #
+# TODO: Add g~ : problem with psreadline keyhandling                           #
+# FIXME: B to not work                                                         #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #

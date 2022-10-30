@@ -9,7 +9,7 @@ This modules require PSreadline to work
 Appends binding for manipulating inner text
 id est : ci di
 ### Supported bracket key
-" ' ( [ { : Manipulate text between selected bracket
+" ' ( [ { | : Manipulate text between selected bracket
 ### Supported mouvement key
 w W : Manipulate text between non word character ou blank character (word and WORD)
 
@@ -18,7 +18,7 @@ C 	: Manipulate text between non word and Caps
 Appends binding to manipulate outer text
 id est : ca da
 ### Supported bracket key
-" ' ( [ { : Manipulate text between selected bracket
+" ' ( [ { | : Manipulate text between selected bracket
 ### Supported mouvement key
 w W : Manipulate text between non word character ou blank character (word and WORD)
 ## Surrounds
@@ -63,7 +63,9 @@ gf : Open file under cursor if exist
 Set variable $VIExperimental to $True to activate
 
 gu gU / lowercase ; uppercase :
-	supported motion
-	g[digit]U : next X charater
-	gU[motion] iwW : next word WORD
+
+supported motion
+- g[digit]U : next X charater
+- gU[motion] iwW : next word WORD
+
 <C+)> Call Help for CmdLet or Operation using ENV PAGER or more if not defined
