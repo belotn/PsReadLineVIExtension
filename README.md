@@ -69,3 +69,5 @@ supported motion
 - gU[motion] iwW : next word WORD
 
 <C+)> Call Help for CmdLet or Operation using ENV PAGER or more if not defined
+
+z= : Generate a list of the closest cmdlet from tho one under cursor  

@@ -950,7 +950,6 @@ function VIGlobalPaste (){
 		}else{
 			$Length = $Line.Length
 			$Line += $Lines
-			$Line | out-file c:\temp\log.txt
 			[Microsoft.Powershell.PSConsoleReadline]::Replace(0, $Length , `
 					$Line)
 		}
@@ -1079,6 +1078,7 @@ Export-ModuleMember -Function 'VIDecrement', 'VIIncrement', `
 # VERSION: 1.0.8                                                               #
 # TODO: Add g~ : problem with psreadline keyhandling                           #
 # FIXME: B to not work                                                         #
+# FIXED: +p and +P generate log error                                          #
 # HEAD:                                                                        #
 ################################################################################
 # {{{CODING FORMAT                                                             #
