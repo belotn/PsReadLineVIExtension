@@ -992,13 +992,18 @@ function VIZWordSubstitution 	{
 			E={ LevenstienDistance $Command $_.Name -i
 			}} | sort LD | select -First 20).Name
 	}
-	# $subst = $Commands | Invoke-Fzf -NoSort -Layout reverse
-	$subst = invoke-command -ScriptBlock $SBDisplayChoice `
-		-ArgumentList $Commands, $null
+	if(Get-Module PsFZF){
+		$subst = $Commands | Invoke-Fzf -NoSort -Layout reverse
+	}else{
+		$subst = invoke-command -ScriptBlock $SBDisplayChoice `
+			-ArgumentList $Commands, $null
+	}
 	if( $null -ne $subst){
 		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($Token.Start, $Token.Length, $subst)
 	}
-	Clear-Host
+	if(-not (Get-Module psFzf) ) {
+		Clear-Host
+	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::InvokePrompt()
 }
 # }}}
